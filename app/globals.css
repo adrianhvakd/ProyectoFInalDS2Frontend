@@ -1,26 +1,97 @@
 @import "tailwindcss";
+@plugin "daisyui";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ============================================================
+   TEMA OSCURO — Mining Dark
+   Fix: Mayor contraste entre capas, primary más luminoso
+   ============================================================ */
+@plugin "daisyui/theme" {
+  name: "mining-dark";
+  default: true;
+  prefersdark: true;
+  color-scheme: "dark";
+
+  /* CLAVE: saltos de ~6-7% entre capas para que las cards se vean */
+  --color-base-100: oklch(14% 0.02 250);   /* fondo: negro azulado profundo */
+  --color-base-200: oklch(20% 0.028 250);  /* cards: salto visible de 6% */
+  --color-base-300: oklch(28% 0.035 250);  /* bordes/inputs: otro salto de 8% */
+  --color-base-content: oklch(90% 0.012 240);
+
+  /* Primary más luminoso para destacar sobre el fondo oscuro */
+  --color-primary: oklch(62% 0.2 250);
+  --color-primary-content: oklch(99% 0.005 250);
+
+  --color-secondary: oklch(48% 0.09 245);
+  --color-secondary-content: oklch(95% 0.01 245);
+
+  /* Accent dorado — igual que el light, funciona bien en ambos */
+  --color-accent: oklch(72% 0.19 72);
+  --color-accent-content: oklch(16% 0.07 72);
+
+  /* Neutral con más contraste en dark */
+  --color-neutral: oklch(32% 0.05 245);
+  --color-neutral-content: oklch(88% 0.02 240);
+
+  --color-info: oklch(64% 0.17 230);
+  --color-info-content: oklch(99% 0.005 230);
+  --color-success: oklch(60% 0.18 155);
+  --color-success-content: oklch(99% 0.005 155);
+  --color-warning: oklch(74% 0.19 60);
+  --color-warning-content: oklch(16% 0.07 60);
+  --color-error: oklch(58% 0.22 22);
+  --color-error-content: oklch(99% 0.005 22);
+
+  --radius-selector: 0.5rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.75rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 1;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* ============================================================
+   TEMA CLARO — Mining Light (sin cambios, ya te gusta)
+   ============================================================ */
+@plugin "daisyui/theme" {
+  name: "mining-light";
+  default: false;
+  prefersdark: false;
+  color-scheme: "light";
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+  --color-base-100: oklch(97% 0.008 240);
+  --color-base-200: oklch(92% 0.015 240);
+  --color-base-300: oklch(85% 0.025 240);
+  --color-base-content: oklch(22% 0.025 245);
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  --color-primary: oklch(42% 0.18 250);
+  --color-primary-content: oklch(98% 0.01 250);
+
+  --color-secondary: oklch(52% 0.1 245);
+  --color-secondary-content: oklch(98% 0.01 245);
+
+  --color-accent: oklch(65% 0.18 72);
+  --color-accent-content: oklch(15% 0.06 72);
+
+  --color-neutral: oklch(60% 0.04 240);
+  --color-neutral-content: oklch(98% 0.01 240);
+
+  --color-info: oklch(50% 0.18 230);
+  --color-info-content: oklch(98% 0.01 230);
+  --color-success: oklch(48% 0.18 155);
+  --color-success-content: oklch(98% 0.01 155);
+  --color-warning: oklch(62% 0.19 60);
+  --color-warning-content: oklch(15% 0.06 60);
+  --color-error: oklch(48% 0.22 22);
+  --color-error-content: oklch(98% 0.01 22);
+
+  --radius-selector: 0.5rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.75rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 1;
 }

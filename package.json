@@ -9,9 +9,15 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.8.0",
+    "@supabase/supabase-js": "^2.97.0",
+    "daisyui": "^5.5.19",
+    "lucide-react": "^0.575.0",
     "next": "16.1.6",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "react-hook-form": "^7.71.2",
+    "recharts": "^3.7.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -22,5 +28,6 @@
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
     "typescript": "^5"
-  }
+  },
+  "packageManager": "pnpm@10.30.2+sha512.36cdc707e7b7940a988c9c1ecf88d084f8514b5c3f085f53a2e244c2921d3b2545bc20dd4ebe1fc245feec463bb298aecea7a63ed1f7680b877dc6379d8d0cb4"
 }
