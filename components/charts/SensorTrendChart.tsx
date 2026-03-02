@@ -13,7 +13,7 @@ export function SensorTrendChart({ sensorType, title, color = "#0087F8" }: BaseC
   if (error) return <ChartError message={error} />;
 
   return (
-    <div className="w-full h-96 bg-base-200 p-6 rounded-2xl shadow-sm border border-slate-100">
+    <div className="w-full h-96 bg-base-200 p-6 rounded-2xl shadow-sm border border-neutral-content/10">
       <div className="mb-6">
         <h3 className="text-lg font-bold text-primary">{title}</h3>
         <p className="text-sm text-slate-500">Promedios de las últimas 24 horas</p>

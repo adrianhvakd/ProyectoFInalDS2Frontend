@@ -2,8 +2,11 @@
 @plugin "daisyui";
 
 /* ============================================================
-   TEMA OSCURO — Mining Dark
-   Fix: Mayor contraste entre capas, primary más luminoso
+   TEMA OSCURO — NSPoland Dark
+   Colores extraídos por análisis de píxeles del dashboard real:
+   · base-100 fondo puro:  RGB(8,8,8)     → #080808
+   · base-200 cards:       RGB(23,23,23)  → #171717
+   · primary título:       RGB(236,162,27)→ #eca21b (ámbar-dorado, hue 70°)
    ============================================================ */
 @plugin "daisyui/theme" {
   name: "mining-dark";
@@ -11,36 +14,40 @@
   prefersdark: true;
   color-scheme: "dark";
 
-  /* CLAVE: saltos de ~6-7% entre capas para que las cards se vean */
-  --color-base-100: oklch(14% 0.02 250);   /* fondo: negro azulado profundo */
-  --color-base-200: oklch(20% 0.028 250);  /* cards: salto visible de 6% */
-  --color-base-300: oklch(28% 0.035 250);  /* bordes/inputs: otro salto de 8% */
-  --color-base-content: oklch(90% 0.012 240);
+  /* BASE — negro puro, sin croma (el diseño usa negro neutro real) */
+  --color-base-100: oklch(7% 0.002 255);    /* fondo: #080808 — negro casi puro */
+  --color-base-200: oklch(0.2046 0 0);   /* cards: #171717 — salto +6% visible */
+  --color-base-300: oklch(0.2768 0 0);   /* bordes/inputs: #282828 — salto +8% */
+  --color-base-content: oklch(90% 0.006 240); /* texto: blanco suave */
 
-  /* Primary más luminoso para destacar sobre el fondo oscuro */
-  --color-primary: oklch(62% 0.2 250);
-  --color-primary-content: oklch(99% 0.005 250);
+  /* PRIMARY — ámbar-dorado extraído de píxeles: #eca21b → oklch(72% 0.17 70°) */
+  /* Hue 70° = zona ámbar-dorado (entre naranja 50° y amarillo 90°) */
+  --color-primary: oklch(0.7674 0.1638 70.36);
+  --color-primary-content: oklch(12% 0.04 70); /* texto oscuro sobre botón dorado */
 
-  --color-secondary: oklch(48% 0.09 245);
-  --color-secondary-content: oklch(95% 0.01 245);
+  /* SECONDARY — azul-grisáceo apagado para variante secundaria */
+  --color-secondary: oklch(46% 0.09 245);
+  --color-secondary-content: oklch(95% 0.008 245);
 
-  /* Accent dorado — igual que el light, funciona bien en ambos */
-  --color-accent: oklch(72% 0.19 72);
-  --color-accent-content: oklch(16% 0.07 72);
+  /* ACCENT — mismo ámbar ligeramente más saturado para highlights puntales */
+  --color-accent: oklch(0.5853 0.2338 360);
+  --color-accent-content: oklch(12% 0.05 68);
 
-  /* Neutral con más contraste en dark */
-  --color-neutral: oklch(32% 0.05 245);
-  --color-neutral-content: oklch(88% 0.02 240);
+  /* NEUTRAL — superficie intermedia para tooltips, badges neutros */
+  --color-neutral: oklch(26% 0.008 255);
+  --color-neutral-content: oklch(85% 0.006 240);
 
-  --color-info: oklch(64% 0.17 230);
-  --color-info-content: oklch(99% 0.005 230);
-  --color-success: oklch(60% 0.18 155);
-  --color-success-content: oklch(99% 0.005 155);
-  --color-warning: oklch(74% 0.19 60);
-  --color-warning-content: oklch(16% 0.07 60);
-  --color-error: oklch(58% 0.22 22);
-  --color-error-content: oklch(99% 0.005 22);
+  /* SEMÁNTICOS — badges de estado del dashboard */
+  --color-info: oklch(60% 0.17 230);          /* azul "W trakcie" */
+  --color-info-content: oklch(98% 0.005 230);
+  --color-success: oklch(60% 0.18 155);       /* verde "Zakończony" */
+  --color-success-content: oklch(98% 0.005 155);
+  --color-warning: oklch(74% 0.18 65);        /* ámbar "Oczekujący" — mismo rango del primary */
+  --color-warning-content: oklch(12% 0.05 65);
+  --color-error: oklch(58% 0.22 22);          /* rojo errores */
+  --color-error-content: oklch(98% 0.005 22);
 
+  /* FORMA */
   --radius-selector: 0.5rem;
   --radius-field: 0.5rem;
   --radius-box: 0.75rem;
@@ -48,11 +55,13 @@
   --size-field: 0.25rem;
   --border: 1px;
   --depth: 1;
-  --noise: 1;
+  --noise: 0;
 }
 
 /* ============================================================
-   TEMA CLARO — Mining Light (sin cambios, ya te gusta)
+   TEMA CLARO — NSPoland Light
+   Mismo lenguaje visual: primary ámbar-dorado, bases neutras frías
+   El ámbar se oscurece a oklch(58%) para contraste WCAG sobre blanco
    ============================================================ */
 @plugin "daisyui/theme" {
   name: "mining-light";
@@ -60,32 +69,40 @@
   prefersdark: false;
   color-scheme: "light";
 
-  --color-base-100: oklch(97% 0.008 240);
-  --color-base-200: oklch(92% 0.015 240);
-  --color-base-300: oklch(85% 0.025 240);
-  --color-base-content: oklch(22% 0.025 245);
+  /* BASE — blanco neutro con diferenciación sutil entre capas */
+  --color-base-100: oklch(98% 0.003 240);   /* fondo: blanco puro casi neutro */
+  --color-base-200: oklch(92% 0.008 245);   /* cards: gris muy claro */
+  --color-base-300: oklch(84% 0.014 248);   /* bordes/inputs: gris medio-claro */
+  --color-base-content: oklch(16% 0.012 255); /* texto: negro neutro oscuro */
 
-  --color-primary: oklch(42% 0.18 250);
-  --color-primary-content: oklch(98% 0.01 250);
+  /* PRIMARY — mismo ámbar-dorado pero oscurecido para contraste sobre blanco */
+  /* oklch(58%) mantiene el mismo hue 70° pero legible (ratio ~4.5:1 sobre white) */
+  --color-primary: oklch(0.7674 0.1638 70.36);
+  --color-primary-content: oklch(98% 0.004 70); /* texto blanco sobre botón dorado */
 
-  --color-secondary: oklch(52% 0.1 245);
-  --color-secondary-content: oklch(98% 0.01 245);
+  /* SECONDARY */
+  --color-secondary: oklch(44% 0.1 245);
+  --color-secondary-content: oklch(98% 0.005 245);
 
-  --color-accent: oklch(65% 0.18 72);
-  --color-accent-content: oklch(15% 0.06 72);
+  /* ACCENT */
+  --color-accent: oklch(0.5853 0.2338 360);
+  --color-accent-content: oklch(98% 0.004 68);
 
-  --color-neutral: oklch(60% 0.04 240);
-  --color-neutral-content: oklch(98% 0.01 240);
+  /* NEUTRAL */
+  --color-neutral: oklch(58% 0.018 250);
+  --color-neutral-content: oklch(98% 0.005 240);
 
-  --color-info: oklch(50% 0.18 230);
-  --color-info-content: oklch(98% 0.01 230);
-  --color-success: oklch(48% 0.18 155);
-  --color-success-content: oklch(98% 0.01 155);
-  --color-warning: oklch(62% 0.19 60);
-  --color-warning-content: oklch(15% 0.06 60);
+  /* SEMÁNTICOS */
+  --color-info: oklch(48% 0.18 230);
+  --color-info-content: oklch(98% 0.005 230);
+  --color-success: oklch(46% 0.18 155);
+  --color-success-content: oklch(98% 0.005 155);
+  --color-warning: oklch(60% 0.18 65);
+  --color-warning-content: oklch(12% 0.05 65);
   --color-error: oklch(48% 0.22 22);
-  --color-error-content: oklch(98% 0.01 22);
+  --color-error-content: oklch(98% 0.005 22);
 
+  /* FORMA */
   --radius-selector: 0.5rem;
   --radius-field: 0.5rem;
   --radius-box: 0.75rem;
@@ -93,5 +110,5 @@
   --size-field: 0.25rem;
   --border: 1px;
   --depth: 1;
-  --noise: 1;
+  --noise: 0;
 }

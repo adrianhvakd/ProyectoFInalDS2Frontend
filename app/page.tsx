@@ -1,67 +1,63 @@
-import Image from "next/image";
 import { sensorService } from "@/services/sensorService";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { AlertBanner } from "@/components/dashboard/AlertBanner";
-import { SensorTrendChart } from "@/components/charts/SensorTrendChart";
+import { DashboardChart } from "@/components/dashboard/DashboardChart";
+import { Gauge, AlertTriangle, CheckCircle2, Activity } from "lucide-react";
 
 export default async function Home() {
   const stats = await sensorService.getDashboardSummary();
 
-  return (
-    <div className="min-h-screen bg-base-100 font-sans text-base-content p-8">
-      <main className="max-w-5xl mx-auto space-y-10">
-        
-        <header className="flex flex-col sm:flex-row justify-between items-center gap-4 border-b border-neutral pb-6">
-          <div className="flex items-center gap-4">
-            <Image className="dark:invert grayscale opacity-80" src="/next.svg" alt="Logo" width={100} height={20} priority />
-            <div className="divider divider-horizontal"></div>
-            <h1 className="text-xl font-bold tracking-widest uppercase text-primary">Mining Control</h1>
-          </div>
-          <div className="badge badge-success badge-soft gap-2 py-3 px-4">
-             <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
-             </span>
-             ONLINE
-          </div>
-        </header>
+  const systemHealth = stats.sensores_totales > 0 
+    ? Math.round((stats.sensores_activos / stats.sensores_totales) * 100) 
+    : 0;
 
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <StatCard 
-            title="Gases Críticos" 
-            value={`${stats.gases_criticos?.toFixed(2) ?? "0.00"}%`}
-            desc="Nivel de Metano"
-            colorClass="text-primary"
-          />
-          <StatCard 
-            title="Temperatura Media" 
-            value={`${stats.temperatura_promedio?.toFixed(1) ?? "--"}°C`}
-            desc="Interior Mina"
-            colorClass="text-secondary"
-          />
-          <StatCard 
-            title="Estado de Red" 
-            value={`${stats.sensores_activos} / ${stats.sensores_totales}`}
-            desc="Sensores activos"
-            colorClass="text-accent"
-          />
-        </section>
+  return (
+    <div className="min-h-screen bg-base-100 font-sans text-base-content p-6 lg:p-8">
+      <main className="max-w-7xl mx-auto space-y-8">
+        
+        <header>
+          <h1 className="text-3xl font-bold text-base-content">Dashboard</h1>
+          <p className="text-base-content/60 mt-1">Monitoreo en tiempo real del sistema minero</p>
+        </header>
 
         <AlertBanner count={stats.alertas_pendientes} />
 
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <SensorTrendChart 
-            sensorType="Gas" 
-            title="Tendencia de Gases (Metano/CO2)" 
-            color="#0087F8" 
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard 
+            title="Sensores Activos" 
+            value={stats.sensores_activos}
+            desc={`de ${stats.sensores_totales} totales`}
+            icon={<Gauge className="w-5 h-5" />}
+            colorClass="text-info"
+            bgClass="bg-info/10"
           />
+          <StatCard 
+            title="Alertas Activas" 
+            value={stats.alertas_pendientes}
+            desc="Requieren atención"
+            icon={<AlertTriangle className="w-5 h-5" />}
+            colorClass="text-error"
+            bgClass="bg-error/10"
+          />
+          <StatCard 
+            title="Temperatura Promedio" 
+            value={stats.temperatura_promedio ? `${stats.temperatura_promedio.toFixed(1)}°C` : "--"}
+            desc="Interior Mina"
+            icon={<Activity className="w-5 h-5" />}
+            colorClass="text-warning"
+            bgClass="bg-warning/10"
+          />
+          <StatCard 
+            title="Salud del Sistema" 
+            value={`${systemHealth}%`}
+            desc="Sensores activos"
+            icon={<CheckCircle2 className="w-5 h-5" />}
+            colorClass="text-success"
+            bgClass="bg-success/10"
+          />
+        </div>
 
-          <SensorTrendChart 
-            sensorType="Temperature" 
-            title="Historial de Temperatura" 
-            color="#F87171" 
-          />
-        </section>
+        <DashboardChart />
 
       </main>
     </div>

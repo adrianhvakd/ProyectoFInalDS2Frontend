@@ -15,8 +15,8 @@ export function SensorGauge({ sensorId, name, unit, max, initialValue = 0 }: Sen
   };
 
   return (
-    <div className="bg-base-200 p-6 rounded-3xl border border-slate-100 flex flex-col items-center shadow-sm">
-      <span className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4">{name}</span>
+    <div className="bg-base-200 p-6 rounded-3xl border border-neutral-content/10 flex flex-col items-center shadow-sm">
+      <span className="text-sm font-bold text-base-content uppercase tracking-widest mb-4">{name}</span>
       
       <div className="relative flex items-center justify-center">
         {/* Círculo de progreso (DaisyUI o SVG) */}
@@ -41,7 +41,7 @@ export function SensorGauge({ sensorId, name, unit, max, initialValue = 0 }: Sen
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
             <span className="relative inline-flex rounded-full h-3 w-3 bg-success"></span>
          </span>
-         <span className="text-[10px] font-bold text-slate-400">LIVE SENSOR ID: {sensorId}</span>
+         <span className="text-[10px] font-bold text-base-content">LIVE SENSOR ID: {sensorId}</span>
       </div>
     </div>
   );

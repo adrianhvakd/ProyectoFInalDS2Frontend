@@ -3,8 +3,14 @@
 import { usePathname } from "next/navigation";
 import Sidebar from "@/components/sidebar";
 import AlertNotifications from "@/components/alerts/AlertNotifications";
+import { UserData } from "@/components/auth/actions";
 
-export default function ClientLayout({ children }: { children: React.ReactNode }) {
+interface ClientLayoutProps {
+  children: React.ReactNode;
+  userData?: UserData;
+}
+
+export default function ClientLayout({ children, userData }: ClientLayoutProps) {
   const pathname = usePathname();
   
   const isAuthPage = pathname?.startsWith('/auth/login') || 
@@ -13,22 +19,18 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
   if (isAuthPage) {
     return (
-      <html lang="es" data-theme="light">
-        <body className="antialiased font-sans">
-          {children}
-        </body>
-      </html>
+      <body className="antialiased font-sans">
+        {children}
+      </body>
     );
   }
 
   return (
-    <html lang="es" data-theme="light">
-      <body className="antialiased font-sans">
-        <AlertNotifications />
-        <Sidebar>
-          {children}
-        </Sidebar>
-      </body>
-    </html>
+    <body className="antialiased font-sans">
+      <AlertNotifications />
+      <Sidebar userData={userData}>
+        {children}
+      </Sidebar>
+    </body>
   );
 }

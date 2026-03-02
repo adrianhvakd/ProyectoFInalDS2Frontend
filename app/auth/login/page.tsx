@@ -1,48 +1,29 @@
 import LoginForm from "@/components/auth/loginForm";
+import { Facebook, Instagram  } from 'lucide-react';
 
 function LoginPage() {
   return (
-    <div className="min-h-screen flex">
-      <div className="hidden lg:flex lg:w-1/2 relative">
+    <div className="min-h-screen flex items-center justify-center bg-base-100">
+      <div className="login-card flex w-212.5 max-w-[95%] bg-base-200 rounded-xl overflow-hidden shadow-[0_15px_35px_rgba(0,0,0,0.1)]">
         <div 
-          className="absolute inset-0 bg-cover bg-center"
+          className="image-side hidden lg:flex flex-1 bg-cover bg-center min-h-125"
           style={{ 
-            backgroundImage: "url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1920&q=80')"
+            backgroundImage: "url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80')"
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/30" />
-        <div className="relative z-10 flex flex-col justify-center px-12 text-white">
-          <h1 className="text-5xl font-black italic mb-4">MINA PRO</h1>
-          <p className="text-xl opacity-90 max-w-md">
-            Sistema de monitoreo en tiempo real para operaciones mineras.
-            Controla tus sensores y recibe alertas instantáneas.
-          </p>
-          <div className="mt-8 flex gap-4">
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-              <p className="text-2xl font-bold">24/7</p>
-              <p className="text-sm opacity-70">Monitoreo</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-              <p className="text-2xl font-bold">Real-time</p>
-              <p className="text-sm opacity-70">Alertas</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-              <p className="text-2xl font-bold">100%</p>
-              <p className="text-sm opacity-70">Online</p>
+
+        <div className="form-side flex-1 p-10 flex flex-col">
+          <div className="header-form flex justify-between items-center mb-5">
+            <h2 className="text-[1.8rem] text-base-content font-medium">Inicio de Sesión</h2>
+            <div className="social-icons flex gap-2.5">
+              <a href="#" className="w-9 h-9 rounded-full border border-base-content/20 flex justify-center items-center text-base-content/90 text-[0.9rem] no-underline transition-all hover:bg-primary hover:text-white hover:border-primary">
+                <Facebook className="size-4" />
+              </a>
+              <a href="#" className="w-9 h-9 rounded-full border border-base-content/20 flex justify-center items-center text-base-content/90 text-[0.9rem] no-underline transition-all hover:bg-primary hover:text-white hover:border-primary">
+                <Instagram className="size-4" />
+              </a>
             </div>
           </div>
-        </div>
-      </div>
-
-      <div className="flex-1 flex items-center justify-center p-8 bg-base-100">
-        <div className="w-full max-w-md">
-          <div className="lg:hidden mb-8 text-center">
-            <h1 className="text-3xl font-black text-primary italic">MINA PRO</h1>
-            <p className="text-base-content/60">Sistema de Monitoreo Minero</p>
-          </div>
-
-          <h2 className="text-2xl font-semibold mb-2">Bienvenido de nuevo</h2>
-          <p className="text-base-content/60 mb-8">Ingresa tus credenciales para acceder al panel</p>
 
           <LoginForm />
         </div>
