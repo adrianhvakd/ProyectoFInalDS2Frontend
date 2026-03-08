@@ -1,33 +1,57 @@
 import { createClient as createBrowserClient } from '@/utils/supabase/client';
+import { createServerClient } from '@supabase/ssr';
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const PROXY_URL = '/api/proxy';
+
+async function getSupabaseServerClient() {
+  const { cookies } = await import('next/headers');
+  const cookieStore = await cookies();
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll() {},
+      },
+    }
+  );
+}
 
 export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const supabase = createBrowserClient();
+  const isServer = typeof window === 'undefined';
   
-  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  let session;
   
-  if (sessionError) {
-    console.error("Error obteniendo sesión:", sessionError);
+  if (isServer) {
+    const supabase = await getSupabaseServerClient();
+    const { data } = await supabase.auth.getSession();
+    session = data.session;
+  } else {
+    const supabase = createBrowserClient();
+    const { data } = await supabase.auth.getSession();
+    session = data.session;
   }
 
-  const token = session?.access_token;
-
-  const defaultHeaders: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
-
-  if (token) {
-    defaultHeaders['Authorization'] = `Bearer ${token}`;
-  } else {
+  if (!session) {
     throw new Error("Not authenticated");
   }
 
+  const url = isServer 
+    ? `${API_URL}/${endpoint.replace(/^\//, '')}`
+    : `${PROXY_URL}${endpoint}`;
+
+  const token = session?.access_token;
+
   try {
-    const response = await fetch(`${API_URL}/${endpoint.replace(/^\//, '')}`, {
+    const response = await fetch(url, {
       ...options,
       headers: {
-        ...defaultHeaders,
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         ...options.headers,
       },
     });
