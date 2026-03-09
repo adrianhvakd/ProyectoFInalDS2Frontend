@@ -40,7 +40,6 @@ export async function signup(data: RegisterFormInputs) {
       data: {
         username: data.username,
         full_name: data.full_name,
-        role: 'operator',
       },
     },
   })
@@ -55,7 +54,7 @@ export async function signup(data: RegisterFormInputs) {
 export async function login(data: LoginFormInputs, rememberMe: boolean = true) {
   const supabase = await createClient()
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { error, data: authData } = await supabase.auth.signInWithPassword({
     email: data.email,
     password: data.password,
   })
@@ -74,7 +73,28 @@ export async function login(data: LoginFormInputs, rememberMe: boolean = true) {
     })
   }
 
-  redirect('/')
+  const { data: { user } } = await supabase.auth.getUser()
+  let role = 'user'
+  
+  if (user) {
+    const { data: profile } = await supabase
+      .from('user')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+    
+    if (profile) {
+      role = profile.role || 'user'
+    }
+  }
+
+  if (role === 'admin') {
+    redirect('/admin')
+  } else if (role === 'operator') {
+    redirect('/operator')
+  } else {
+    redirect('/')
+  }
 }
 
 export async function logout() {
@@ -99,10 +119,25 @@ export async function getUserData(): Promise<UserData> {
     return null
   }
   
+  const { data: profile } = await supabase
+    .from('user')
+    .select('username, full_name, role, email')
+    .eq('id', user.id)
+    .single()
+  
+  if (profile) {
+    return {
+      username: profile.username || '',
+      full_name: profile.full_name || '',
+      role: profile.role || 'user',
+      email: profile.email || user.email || '',
+    }
+  }
+  
   return {
     username: user.user_metadata?.username || '',
     full_name: user.user_metadata?.full_name || '',
-    role: user.user_metadata?.role || 'operator',
+    role: user.user_metadata?.role || 'user',
     email: user.email || '',
   }
 }

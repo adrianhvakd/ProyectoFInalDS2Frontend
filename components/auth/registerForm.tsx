@@ -10,7 +10,6 @@ export type RegisterFormInputs = {
   username: string;
   full_name: string;
   password: string;
-  role: string;
   confirmPassword: string;
 };
 
@@ -27,7 +26,6 @@ function RegisterForm() {
 
   const onSubmit: SubmitHandler<RegisterFormInputs> = async (data) => {
     setIsLoading(true);
-    data.role = "operator";
 
     const result = await signup(data);
 

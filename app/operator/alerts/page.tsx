@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useAlertsRealtime } from "@/hooks/useAlertsRealtime";
 import { useSensors } from "@/hooks/useSensors";
-import { AlertItem } from "@/components/alerts/AlertItem";
 import ModalAlertsHistory from "@/components/alerts/ModalAlertsHistory";
 import { createClient } from "@/utils/supabase/client";
 import { Alert } from "@/types/alert";
@@ -11,7 +10,7 @@ import { TriangleAlert, AlertTriangle, ShieldCheck, History, Trash2, Download } 
 
 type FilterType = "all" | "active" | "resolved";
 
-export default function AlertsPage() {
+export default function OperatorAlertsPage() {
   const { warnings, criticals, loading, resolveAlert, resolveAllBySensor, refresh } = useAlertsRealtime();
   const { sensors, loading: sensorsLoading } = useSensors();
   const [resolvingId, setResolvingId] = useState<number | null>(null);

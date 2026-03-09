@@ -53,7 +53,14 @@ async function handleRequest(request: NextRequest) {
     body: request.method !== 'GET' && request.method !== 'HEAD' ? await request.text() : undefined,
   });
 
-  const data = await response.json().catch(() => null);
+  const contentType = response.headers.get('content-type');
+  let data;
+  
+  if (contentType && contentType.includes('application/json')) {
+    data = await response.json().catch(() => ({ detail: 'Error parsing JSON' }));
+  } else {
+    data = { detail: await response.text() };
+  }
 
   return NextResponse.json(data, { status: response.status });
 }

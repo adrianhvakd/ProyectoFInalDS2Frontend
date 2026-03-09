@@ -13,9 +13,10 @@ interface ClientLayoutProps {
 export default function ClientLayout({ children, userData }: ClientLayoutProps) {
   const pathname = usePathname();
   
-  const isAuthPage = pathname?.startsWith('/auth/login') || 
-                     pathname?.startsWith('/auth/register') ||
-                     pathname?.startsWith('/auth/callback');
+  const isAuthPage = pathname?.startsWith('/auth/login') || pathname?.startsWith('/auth/register') || pathname?.startsWith('/auth/callback');
+  const isPublicPage = pathname === '/' || pathname?.startsWith('/services') || pathname?.startsWith('/checkout') || pathname?.startsWith('/order');
+  const isOperatorPage = pathname?.startsWith('/operator');
+  const isAdminPage = pathname?.startsWith('/admin');
 
   if (isAuthPage) {
     return (
@@ -25,9 +26,17 @@ export default function ClientLayout({ children, userData }: ClientLayoutProps) 
     );
   }
 
+  if (isPublicPage) {
+    return (
+      <body className="antialiased font-sans">
+        {children}
+      </body>
+    );
+  }
+
   return (
     <body className="antialiased font-sans">
-      <AlertNotifications />
+      {(isOperatorPage || isAdminPage) && <AlertNotifications />}
       <Sidebar userData={userData}>
         {children}
       </Sidebar>

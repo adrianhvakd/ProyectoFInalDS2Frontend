@@ -1,18 +1,21 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { logout } from "./auth/actions";
 import { UserData } from "./auth/actions";
+import { useNotifications, NotificationBell, NotificationDropdown } from "@/components/ui/useNotifications";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 import {
   Gauge,
-  ChartLine,
   TriangleAlert,
   LogOut,
   HardHat,
-  Search,
-  User,
-  Bell,
   Menu,
   Settings,
+  User,
+  ShoppingCart,
+  Users,
+  Shield,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -24,15 +27,38 @@ interface SidebarProps {
 
 export default function Sidebar({ children, userData }: SidebarProps) {
   const pathname = usePathname();
+  const role = userData?.role || 'user';
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  const { notifications, loading, isOpen, unreadCount, openNotifications, closeNotifications, markAllAsRead } = useNotifications();
 
-  const navItems = [
-    { href: "/", label: "Dashboard", icon: Gauge },
-    { href: "/sensors", label: "Sensores en vivo", icon: ChartLine },
-    { href: "/alerts", label: "Alertas", icon: TriangleAlert },
+  const operatorNavItems = [
+    { href: "/operator", label: "Dashboard", icon: Gauge },
+    { href: "/operator/map", label: "Mapa de la Mina", icon: HardHat },
+    { href: "/operator/alerts", label: "Alertas", icon: TriangleAlert },
   ];
 
+  const adminNavItems = [
+    { href: "/admin", label: "Dashboard", icon: Gauge },
+    { href: "/admin/orders", label: "Pedidos", icon: ShoppingCart },
+    { href: "/admin/users", label: "Usuarios", icon: Users },
+  ];
+
+  const navItems = role === 'admin' ? adminNavItems : operatorNavItems;
+
   const displayName = userData?.username || userData?.full_name || 'Usuario';
-  const displayRole = userData?.role === 'operator' ? 'Operador' : 'Administrador';
+  const displayRole = role === 'admin' ? 'Administrador' : role === 'operator' ? 'Operador' : 'Usuario';
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        closeNotifications();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [closeNotifications]);
 
   return (
     <div className="drawer lg:drawer-open bg-base-100">
@@ -52,12 +78,18 @@ export default function Sidebar({ children, userData }: SidebarProps) {
 
           <div className="flex-none flex items-center gap-2 sm:gap-4">
 
-            <button className="btn btn-ghost btn-circle">
-              <div className="indicator">
-                <Bell className="size-5 text-base-content/70" />
-                <span className="indicator-item badge bg-primary border-primary rounded-full size-2.5 p-0 mt-1 mr-1"></span>
-              </div>
-            </button>
+            <ThemeToggle />
+
+            <div className="relative" ref={dropdownRef}>
+              <NotificationBell unreadCount={unreadCount} onClick={openNotifications} />
+              <NotificationDropdown 
+                notifications={notifications} 
+                loading={loading} 
+                isOpen={isOpen} 
+                onClose={closeNotifications}
+                onMarkAllRead={markAllAsRead}
+              />
+            </div>
 
             <div className="dropdown dropdown-end">
               <div
@@ -125,9 +157,9 @@ export default function Sidebar({ children, userData }: SidebarProps) {
 
         <div className="flex min-h-full flex-col bg-base-100 is-drawer-close:w-20 is-drawer-open:w-64 border-r border-base-300/50 transition-all">
           <div className="flex flex-col items-center gap-2 px-4 py-6 border-b border-base-300/50">
-            <HardHat className="size-12 text-primary is-drawer-close:size-8 transition-all" />
+            <Shield className="size-12 text-primary is-drawer-close:size-8 transition-all" />
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-base-content/80 is-drawer-close:hidden">
-              Control Center
+              MineMonitor
             </span>
           </div>
 

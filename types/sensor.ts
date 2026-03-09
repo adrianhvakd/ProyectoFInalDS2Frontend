@@ -7,6 +7,7 @@ export interface Sensor {
   min_threshold: number;
   max_threshold: number;
   is_active: boolean;
+  api_key?: string;
   position_x: number;
   position_y: number;
   company_id: number;

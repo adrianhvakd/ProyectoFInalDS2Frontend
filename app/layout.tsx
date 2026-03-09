@@ -23,8 +23,19 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const userData = await getUserData();
 
   return (
-    <html lang="es" data-theme="mining-dark">
+    <html lang="es" data-theme="mining-dark" suppressHydrationWarning>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                var theme = localStorage.getItem('theme') || 'dark';
+                var dataTheme = theme === 'dark' ? 'mining-dark' : 'mining-light';
+                document.documentElement.setAttribute('data-theme', dataTheme);
+              })();
+            `,
+          }}
+        />
       </head>
       <ClientLayout userData={userData}>{children}</ClientLayout>
     </html>
