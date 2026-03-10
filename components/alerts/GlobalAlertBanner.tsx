@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Alert } from '@/types/alert';
+import { getUserData } from '@/components/auth/actions';
 import { 
   AlertTriangle, 
   X, 
@@ -17,15 +18,29 @@ export function GlobalAlertBanner() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [loading, setLoading] = useState(true);
   const [dismissed, setDismissed] = useState(false);
+  const [companyId, setCompanyId] = useState<number | null>(null);
   const supabase = createClient();
 
   useEffect(() => {
+    async function loadCompanyId() {
+      const userData = await getUserData();
+      if (userData?.company_id) {
+        setCompanyId(userData.company_id);
+      }
+    }
+    loadCompanyId();
+  }, []);
+
+  useEffect(() => {
+    if (!companyId) return;
+
     const fetchAlerts = async () => {
       try {
         const { data, error } = await supabase
           .from('alert')
           .select('*')
           .eq('is_resolved', false)
+          .eq('company_id', companyId)
           .order('timestamp', { ascending: false })
           .limit(5);
 
@@ -63,7 +78,7 @@ export function GlobalAlertBanner() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [companyId]);
 
   const resolveAlert = async (alertId: number) => {
     try {

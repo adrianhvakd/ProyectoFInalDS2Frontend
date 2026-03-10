@@ -37,7 +37,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           }}
         />
       </head>
-      <body className="antialiased font-sans">
+      <body className="antialiased font-sans" suppressHydrationWarning>
         <ClientLayout userData={userData}>{children}</ClientLayout>
       </body>
     </html>

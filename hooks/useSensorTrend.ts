@@ -3,25 +3,30 @@ import { getReadingTrendClient } from "@/services/readingClientService";
 import { TrendPoint } from "@/types/reading";
 import { ChartDataPoint } from "@/types/dashboard";
 
-export function useSensorTrend(sensorType: string) {
+export function useSensorTrend(sensorType: string, companyId?: number) {
   const [data, setData] = useState<ChartDataPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!sensorType || sensorType === "undefined") return;
+    if (!companyId) return;
 
     async function loadData() {
       try {
         setIsLoading(true);
         setError(null);
         
-        const response = await getReadingTrendClient(sensorType, 24);
+        console.log("Cargando datos para:", sensorType, "companyId:", companyId);
+        const response = await getReadingTrendClient(sensorType, 24, companyId);
+        console.log("Datos recibidos:", response);
+        
         const formatted: ChartDataPoint[] = response.map((item: TrendPoint) => ({
           hora: item.hora,
           nivel: item.valor, 
         }));
         
+        console.log("Datos formateados:", formatted);
         setData(formatted);
       } catch (err: unknown) {
         console.error(`Error en useSensorTrend [${sensorType}]:`, err);
@@ -33,7 +38,7 @@ export function useSensorTrend(sensorType: string) {
     }
 
     loadData();
-  }, [sensorType]);
+  }, [sensorType, companyId]);
 
   return { data, isLoading, error };
 }

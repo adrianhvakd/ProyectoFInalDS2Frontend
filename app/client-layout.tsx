@@ -4,7 +4,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import Sidebar from "@/components/sidebar";
-import AlertNotifications from "@/components/alerts/AlertNotifications";
 import { GlobalAlertBanner } from "@/components/alerts/GlobalAlertBanner";
 import { SubscriptionInfo } from "@/types/subscription";
 
@@ -92,7 +91,6 @@ export default function ClientLayout({ children, userData }: ClientLayoutProps) 
   return (
     <>
       {isOperatorPage && <GlobalAlertBanner />}
-      {(isOperatorPage || isAdminPage) && <AlertNotifications />}
       <Sidebar userData={userData}>
         {children}
       </Sidebar>

@@ -28,7 +28,9 @@ export function useSensorRealtime(sensorId: number | string | undefined, initial
           return;
         }
 
-        if (data) setValue(data.value);
+        if (data) {
+          setValue(data.value);
+        }
       } catch (err) {
         console.error("Error inesperado:", err);
       } finally {
@@ -38,19 +40,22 @@ export function useSensorRealtime(sensorId: number | string | undefined, initial
 
     fetchLastValue();
 
+    // Escuchar todas las lecturas y filtrar en el cliente
     const channel = supabase
       .channel(`live-sensor-${sensorId}`)
       .on(
-        'postgres_changes',
+        'postgres_changes', 
         { 
           event: 'INSERT', 
           schema: 'public', 
-          table: 'reading',
-          filter: `sensor_id=eq.${sensorId}` 
+          table: 'reading'
         },
         (payload) => {
-          console.log("Nueva lectura detectada:", payload.new.value);
-          setValue(payload.new.value);
+          // Filtrar solo las lecturas de este sensor
+          if (payload.new.sensor_id === sensorId) {
+            console.log(`Sensor ${sensorId} - Nueva lectura:`, payload.new.value);
+            setValue(payload.new.value);
+          }
         }
       )
       .subscribe();

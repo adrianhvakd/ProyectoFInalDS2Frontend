@@ -108,6 +108,7 @@ export type UserData = {
   full_name: string;
   role: string;
   email: string;
+  company_id: number | null;
 } | null;
 
 export async function getUserData(): Promise<UserData> {
@@ -121,7 +122,7 @@ export async function getUserData(): Promise<UserData> {
   
   const { data: profile } = await supabase
     .from('user')
-    .select('username, full_name, role, email')
+    .select('username, full_name, role, email, company_id')
     .eq('id', user.id)
     .single()
   
@@ -131,6 +132,7 @@ export async function getUserData(): Promise<UserData> {
       full_name: profile.full_name || '',
       role: profile.role || 'user',
       email: profile.email || user.email || '',
+      company_id: profile.company_id,
     }
   }
   
@@ -139,5 +141,6 @@ export async function getUserData(): Promise<UserData> {
     full_name: user.user_metadata?.full_name || '',
     role: user.user_metadata?.role || 'user',
     email: user.email || '',
+    company_id: null,
   }
 }

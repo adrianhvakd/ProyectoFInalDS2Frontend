@@ -7,4 +7,5 @@ export interface BaseChartProps {
   title: string;
   color?: string;
   sensorType: string;
+  companyId?: number;
 }

@@ -60,17 +60,17 @@ function SensorMarker({ sensor, onClick, onHover }: SensorMarkerProps) {
       onMouseLeave={() => onHover(false)}
     >
       <circle
-        r="8"
+        r="12"
         fill="rgba(30, 30, 30, 0.95)"
         stroke={getColor()}
-        strokeWidth="1.5"
+        strokeWidth="2"
       />
-      <foreignObject x="-6" y="-6" width="12" height="12" className="overflow-visible">
+      <foreignObject x="-9" y="-9" width="18" height="18" className="overflow-visible">
         <div className="flex items-center justify-center w-full h-full">
-          <Icon size={8} color={getColor()} strokeWidth={2.5} />
+          <Icon size={12} color={getColor()} strokeWidth={2.5} />
         </div>
       </foreignObject>
-      <text textAnchor="middle" y="18" fill="white" fontSize="7" fontWeight="bold">
+      <text textAnchor="middle" y="25" fill="white" fontSize="9" fontWeight="bold">
         {displayValue}
       </text>
     </g>
@@ -84,9 +84,9 @@ function SensorTooltip({ sensor }: { sensor: Sensor }) {
   const unit = sensor.type.toLowerCase() === 'gas' ? 'ppm' : '°C';
   
   return (
-    <g transform="translate(0, -25)">
-      <rect x="-45" y="-22" width="90" height="25" fill="rgba(0, 0, 0, 0.95)" rx="4" />
-      <text x="0" y="-8" textAnchor="middle" fill="white" fontSize="8" fontWeight="bold">
+    <g transform="translate(0, -35)">
+      <rect x="-50" y="-25" width="100" height="28" fill="rgba(0, 0, 0, 0.95)" rx="4" />
+      <text x="0" y="-8" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">
         {sensor.name}: {value !== undefined ? value.toFixed(1) : '--'}{unit}
       </text>
     </g>

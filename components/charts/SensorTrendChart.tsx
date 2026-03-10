@@ -6,8 +6,8 @@ import { ChartSkeleton, ChartError } from "./ChartStates";
 import { BaseChartProps } from "@/types/dashboard";
 
 
-export function SensorTrendChart({ sensorType, title, color = "#0087F8" }: BaseChartProps) {
-  const { data, isLoading, error } = useSensorTrend(sensorType);
+export function SensorTrendChart({ sensorType, title, color = "#0087F8", companyId }: BaseChartProps) {
+  const { data, isLoading, error } = useSensorTrend(sensorType, companyId);
 
   if (isLoading) return <ChartSkeleton />;
   if (error) return <ChartError message={error} />;

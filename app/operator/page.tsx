@@ -1,11 +1,13 @@
 import { sensorService } from "@/services/sensorService";
+import { getUserData } from "@/components/auth/actions";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { AlertBanner } from "@/components/dashboard/AlertBanner";
 import { DashboardChart } from "@/components/dashboard/DashboardChart";
 import { Gauge, AlertTriangle, CheckCircle2, Activity } from "lucide-react";
 
 export default async function OperatorDashboard() {
-  const stats = await sensorService.getDashboardSummary();
+  const userData = await getUserData();
+  const stats = await sensorService.getDashboardSummary(userData?.company_id ?? undefined);
 
   const systemHealth = stats.sensores_totales > 0 
     ? Math.round((stats.sensores_activos / stats.sensores_totales) * 100) 

@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { sensorService } from '@/services/sensorService';
-import { Sensor, SensorCreate, SensorUpdate } from '@/types/sensor';
 import { companyService } from '@/services/companyService';
+import { Sensor, SensorCreate, SensorUpdate } from '@/types/sensor';
 import { Company } from '@/types/company';
+import { getUserData } from '@/components/auth/actions';
 import MineMap from '@/components/mine-map/MineMap';
 import SensorModal from '@/components/mine-map/SensorModal';
 import SensorForm from '@/components/mine-map/SensorForm';
@@ -24,10 +25,11 @@ export default function MineMapPage() {
 
   const loadData = async () => {
     try {
-      const companies = await companyService.getAll();
-      if (companies.length > 0) {
-        setCompany(companies[0]);
-        const sensorsData = await sensorService.getAllSensors(companies[0].id);
+      const userData = await getUserData();
+      if (userData?.company_id) {
+        const companyData = await companyService.getById(userData.company_id);
+        setCompany(companyData);
+        const sensorsData = await sensorService.getAllSensors(userData.company_id);
         setSensors(sensorsData);
       }
     } catch (error) {

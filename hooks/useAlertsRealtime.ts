@@ -2,18 +2,24 @@ import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { Alert } from "@/types/alert";
 
-export function useAlertsRealtime() {
+export function useAlertsRealtime(companyId?: number) {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
   const fetchAlerts = useCallback(async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from("alert")
         .select("*")
         .eq("is_resolved", false)
         .order("timestamp", { ascending: false });
+
+      if (companyId) {
+        query = query.eq("company_id", companyId);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error("Error fetching alerts:", error.message);
@@ -26,7 +32,7 @@ export function useAlertsRealtime() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [companyId]);
 
   useEffect(() => {
     fetchAlerts();
@@ -74,9 +80,15 @@ export function useAlertsRealtime() {
   };
 
   const resolveAllBySensor = async (sensorId: number) => {
+    if (!companyId) {
+      console.error("No companyId available");
+      return 0;
+    }
+
     try {
-      const { data, error } = await supabase.rpc("resolve_all_alerts", {
+      const { data, error } = await supabase.rpc("resolve_alerts_by_sensor_company", {
         p_sensor_id: sensorId,
+        p_company_id: companyId,
       });
 
       if (error) {

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { Sensor } from "@/types/sensor";
 
-export function useSensors() {
+export function useSensors(companyId?: number) {
   const [sensors, setSensors] = useState<Sensor[]>([]);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
@@ -10,11 +10,17 @@ export function useSensors() {
   useEffect(() => {
     const fetchSensors = async () => {
       try {
-        const { data, error } = await supabase
+        let query = supabase
           .from("sensor")
           .select("*")
           .eq("is_active", true)
           .order("name");
+
+        if (companyId) {
+          query = query.eq("company_id", companyId);
+        }
+
+        const { data, error } = await query;
 
         if (error) {
           console.error("Error fetching sensors:", error.message);
@@ -30,7 +36,7 @@ export function useSensors() {
     };
 
     fetchSensors();
-  }, []);
+  }, [companyId]);
 
   return { sensors, loading };
 }

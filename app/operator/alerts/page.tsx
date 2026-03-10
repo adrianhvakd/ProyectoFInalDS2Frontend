@@ -5,14 +5,16 @@ import { useAlertsRealtime } from "@/hooks/useAlertsRealtime";
 import { useSensors } from "@/hooks/useSensors";
 import ModalAlertsHistory from "@/components/alerts/ModalAlertsHistory";
 import { createClient } from "@/utils/supabase/client";
+import { getUserData } from "@/components/auth/actions";
 import { Alert } from "@/types/alert";
-import { TriangleAlert, AlertTriangle, ShieldCheck, History, Trash2, Download } from "lucide-react";
+import { TriangleAlert, AlertTriangle, ShieldCheck, History, Trash2, Download, TrendingUp  } from "lucide-react";
 
 type FilterType = "all" | "active" | "resolved";
 
 export default function OperatorAlertsPage() {
-  const { warnings, criticals, loading, resolveAlert, resolveAllBySensor, refresh } = useAlertsRealtime();
-  const { sensors, loading: sensorsLoading } = useSensors();
+  const [companyId, setCompanyId] = useState<number | null>(null);
+  const { warnings, criticals, loading, resolveAlert, resolveAllBySensor, refresh } = useAlertsRealtime(companyId ?? undefined);
+  const { sensors, loading: sensorsLoading } = useSensors(companyId ?? undefined);
   const [resolvingId, setResolvingId] = useState<number | null>(null);
   const [selectedSensor, setSelectedSensor] = useState<number | "">("");
   const [resolvingAll, setResolvingAll] = useState(false);
@@ -22,17 +24,29 @@ export default function OperatorAlertsPage() {
   const supabase = createClient();
 
   useEffect(() => {
+    async function loadCompanyId() {
+      const userData = await getUserData();
+      if (userData?.company_id) {
+        setCompanyId(userData.company_id);
+      }
+    }
+    loadCompanyId();
+  }, []);
+
+  useEffect(() => {
     async function fetchResolved() {
+      if (!companyId) return;
       const { data } = await supabase
         .from("alert")
         .select("*")
         .eq("is_resolved", true)
+        .eq("company_id", companyId)
         .order("timestamp", { ascending: false })
         .limit(10);
       if (data) setResolvedAlerts(data);
     }
     fetchResolved();
-  }, []);
+  }, [companyId]);
 
   const handleResolve = async (id: number) => {
     setResolvingId(id);
@@ -114,7 +128,7 @@ export default function OperatorAlertsPage() {
         <div className="bg-base-200 rounded-xl p-4 border border-neutral-content/10">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-error/30 flex items-center justify-center">
-              <span className="text-error font-bold">↗</span>
+              <TrendingUp className="w-5 h-5 text-error"/>
             </div>
             <div>
               <p className="text-xs text-base-content/60">Alta Severidad</p>
