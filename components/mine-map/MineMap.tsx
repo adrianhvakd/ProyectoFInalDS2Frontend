@@ -26,8 +26,8 @@ const getSensorIcon = (type: string) => {
   }
 };
 
-const MAP_WIDTH = 100;
-const MAP_HEIGHT = 100;
+const MAP_WIDTH = 800;
+const MAP_HEIGHT = 600;
 
 interface SensorMarkerProps {
   sensor: Sensor;
@@ -60,17 +60,17 @@ function SensorMarker({ sensor, onClick, onHover }: SensorMarkerProps) {
       onMouseLeave={() => onHover(false)}
     >
       <circle
-        r="16"
+        r="8"
         fill="rgba(30, 30, 30, 0.95)"
         stroke={getColor()}
-        strokeWidth="2"
+        strokeWidth="1.5"
       />
-      <foreignObject x="-10" y="-10" width="20" height="20" className="overflow-visible">
+      <foreignObject x="-6" y="-6" width="12" height="12" className="overflow-visible">
         <div className="flex items-center justify-center w-full h-full">
-          <Icon size={12} color={getColor()} strokeWidth={2.5} />
+          <Icon size={8} color={getColor()} strokeWidth={2.5} />
         </div>
       </foreignObject>
-      <text textAnchor="middle" y="28" fill="white" fontSize="9" fontWeight="bold">
+      <text textAnchor="middle" y="18" fill="white" fontSize="7" fontWeight="bold">
         {displayValue}
       </text>
     </g>
@@ -84,13 +84,10 @@ function SensorTooltip({ sensor }: { sensor: Sensor }) {
   const unit = sensor.type.toLowerCase() === 'gas' ? 'ppm' : '°C';
   
   return (
-    <g transform="translate(0, -35)">
-      <rect x="-55" y="-30" width="110" height="35" fill="rgba(0, 0, 0, 0.95)" rx="6" />
-      <text x="0" y="-15" textAnchor="middle" fill="white" fontSize="11" fontWeight="bold">
-        {sensor.name}
-      </text>
-      <text x="0" y="-3" textAnchor="middle" fill={percentage >= 80 ? '#EF4444' : percentage >= 60 ? '#F59E0B' : '#10B981'} fontSize="10" fontWeight="bold">
-        {value !== undefined ? value.toFixed(1) : '--'} {unit}
+    <g transform="translate(0, -25)">
+      <rect x="-45" y="-22" width="90" height="25" fill="rgba(0, 0, 0, 0.95)" rx="4" />
+      <text x="0" y="-8" textAnchor="middle" fill="white" fontSize="8" fontWeight="bold">
+        {sensor.name}: {value !== undefined ? value.toFixed(1) : '--'}{unit}
       </text>
     </g>
   );
@@ -118,7 +115,7 @@ export default function MineMap({
 
   return (
     <div className="relative">
-      <div className="relative overflow-hidden rounded-lg bg-base-300 border border-base-300" style={{ height: MAP_HEIGHT * 4 }}>
+      <div className="relative overflow-hidden rounded-lg bg-base-300 border border-base-300 w-full max-w-5xl mx-auto">
         <svg
           width="100%"
           height="100%"
