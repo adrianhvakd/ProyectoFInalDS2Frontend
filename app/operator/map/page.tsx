@@ -151,6 +151,7 @@ export default function MineMapPage() {
             <SensorForm
               sensor={editingSensor}
               companyId={company.id}
+              existingSensors={sensors}
               onSubmit={handleSubmit}
               onCancel={() => {
                 setIsFormOpen(false);

@@ -3,6 +3,8 @@
 import { Sensor } from '@/types/sensor';
 import { Zone } from '@/types/company';
 import { useState } from 'react';
+import { useSensorRealtime } from '@/hooks/useSensorRealtime';
+import { Thermometer, Wind, Activity } from 'lucide-react';
 
 interface MineMapProps {
   sensors: Sensor[];
@@ -10,38 +12,89 @@ interface MineMapProps {
   onSensorClick?: (sensor: Sensor) => void;
   onMapClick?: (x: number, y: number) => void;
   isEditorMode?: boolean;
-  width?: number;
-  height?: number;
   showLegend?: boolean;
 }
 
-const getSensorColor = (type: string, value?: number, maxThreshold?: number): string => {
-  if (value !== undefined && maxThreshold !== undefined) {
-    const percentage = (value / maxThreshold) * 100;
-    if (percentage >= 80) return '#EF4444';
-    if (percentage >= 60) return '#F59E0B';
-  }
-  
+const getSensorIcon = (type: string) => {
   switch (type.toLowerCase()) {
     case 'gas':
-      return '#10B981';
+      return Wind;
     case 'temperatura':
-      return '#3B82F6';
+      return Thermometer;
     default:
-      return '#6B7280';
+      return Activity;
   }
 };
 
-const getSensorIcon = (type: string): string => {
-  switch (type.toLowerCase()) {
-    case 'gas':
-      return '💨';
-    case 'temperatura':
-      return '🌡️';
-    default:
-      return '📊';
-  }
-};
+const MAP_WIDTH = 100;
+const MAP_HEIGHT = 100;
+
+interface SensorMarkerProps {
+  sensor: Sensor;
+  onClick: () => void;
+  onHover: (show: boolean) => void;
+}
+
+function SensorMarker({ sensor, onClick, onHover }: SensorMarkerProps) {
+  const { value } = useSensorRealtime(sensor.id, sensor.last_value || 0);
+  const maxThreshold = sensor.max_threshold || 100;
+  const percentage = maxThreshold > 0 ? (value / maxThreshold) * 100 : 0;
+  const Icon = getSensorIcon(sensor.type);
+  
+  const getColor = () => {
+    if (percentage >= 80) return '#EF4444';
+    if (percentage >= 60) return '#F59E0B';
+    return '#10B981';
+  };
+
+  const displayValue = value !== undefined ? value.toFixed(1) : '--';
+
+  return (
+    <g
+      className="cursor-pointer"
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+      onMouseEnter={() => onHover(true)}
+      onMouseLeave={() => onHover(false)}
+    >
+      <circle
+        r="16"
+        fill="rgba(30, 30, 30, 0.95)"
+        stroke={getColor()}
+        strokeWidth="2"
+      />
+      <foreignObject x="-10" y="-10" width="20" height="20" className="overflow-visible">
+        <div className="flex items-center justify-center w-full h-full">
+          <Icon size={12} color={getColor()} strokeWidth={2.5} />
+        </div>
+      </foreignObject>
+      <text textAnchor="middle" y="28" fill="white" fontSize="9" fontWeight="bold">
+        {displayValue}
+      </text>
+    </g>
+  );
+}
+
+function SensorTooltip({ sensor }: { sensor: Sensor }) {
+  const { value } = useSensorRealtime(sensor.id, sensor.last_value || 0);
+  const maxThreshold = sensor.max_threshold || 100;
+  const percentage = maxThreshold > 0 ? (value / maxThreshold) * 100 : 0;
+  const unit = sensor.type.toLowerCase() === 'gas' ? 'ppm' : '°C';
+  
+  return (
+    <g transform="translate(0, -35)">
+      <rect x="-55" y="-30" width="110" height="35" fill="rgba(0, 0, 0, 0.95)" rx="6" />
+      <text x="0" y="-15" textAnchor="middle" fill="white" fontSize="11" fontWeight="bold">
+        {sensor.name}
+      </text>
+      <text x="0" y="-3" textAnchor="middle" fill={percentage >= 80 ? '#EF4444' : percentage >= 60 ? '#F59E0B' : '#10B981'} fontSize="10" fontWeight="bold">
+        {value !== undefined ? value.toFixed(1) : '--'} {unit}
+      </text>
+    </g>
+  );
+}
 
 export default function MineMap({
   sensors,
@@ -49,8 +102,6 @@ export default function MineMap({
   onSensorClick,
   onMapClick,
   isEditorMode = false,
-  width = 800,
-  height = 600,
   showLegend = true,
 }: MineMapProps) {
   const [hoveredSensor, setHoveredSensor] = useState<Sensor | null>(null);
@@ -59,53 +110,53 @@ export default function MineMap({
     if (!isEditorMode || !onMapClick) return;
     
     const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / width) * 100;
-    const y = ((e.clientY - rect.top) / height) * 100;
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
     
     onMapClick(x, y);
   };
 
   return (
     <div className="relative">
-      <div className="bg-base-200 rounded-lg p-4">
+      <div className="relative overflow-hidden rounded-lg bg-base-300 border border-base-300" style={{ height: MAP_HEIGHT * 4 }}>
         <svg
-          width={width}
-          height={height}
-          viewBox={`0 0 ${width} ${height}`}
-          className={`w-full h-auto bg-base-300 rounded ${isEditorMode ? 'cursor-crosshair' : 'cursor-default'}`}
+          width="100%"
+          height="100%"
+          viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
+          className={`w-full h-full ${isEditorMode ? 'cursor-crosshair' : 'cursor-default'}`}
           onClick={handleMapClick}
         >
           <defs>
-            <pattern id="grid" width={width / 10} height={height / 10} patternUnits="userSpaceOnUse">
-              <path d={`M ${width / 10} 0 L 0 0 0 ${height / 10}`} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
+            <pattern id="grid-map" width={MAP_WIDTH / 8} height={MAP_HEIGHT / 8} patternUnits="userSpaceOnUse">
+              <path d={`M ${MAP_WIDTH / 8} 0 L 0 0 0 ${MAP_HEIGHT / 8}`} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5"/>
             </pattern>
           </defs>
           
-          <rect width={width} height={height} fill="url(#grid)" />
+          <rect width={MAP_WIDTH} height={MAP_HEIGHT} fill="url(#grid-map)" />
           
           {zones.map((zone) => (
             <rect
               key={zone.id}
-              x={(zone.position_x / 100) * width}
-              y={(zone.position_y / 100) * height}
-              width={(zone.width / 100) * width}
-              height={(zone.height / 100) * height}
+              x={(zone.position_x / 100) * MAP_WIDTH}
+              y={(zone.position_y / 100) * MAP_HEIGHT}
+              width={(zone.width / 100) * MAP_WIDTH}
+              height={(zone.height / 100) * MAP_HEIGHT}
               fill={zone.color}
-              fillOpacity={0.3}
+              fillOpacity={0.2}
               stroke={zone.color}
-              strokeWidth="2"
-              rx="4"
+              strokeWidth={1.5}
+              rx="3"
             />
           ))}
           
           {zones.map((zone) => (
             <text
               key={`label-${zone.id}`}
-              x={(zone.position_x / 100) * width + ((zone.width / 100) * width) / 2}
-              y={(zone.position_y / 100) * height + ((zone.height / 100) * height) / 2}
+              x={(zone.position_x / 100) * MAP_WIDTH + ((zone.width / 100) * MAP_WIDTH) / 2}
+              y={(zone.position_y / 100) * MAP_HEIGHT + ((zone.height / 100) * MAP_HEIGHT) / 2}
               textAnchor="middle"
               fill="white"
-              fontSize="12"
+              fontSize={10}
               fontWeight="bold"
             >
               {zone.name}
@@ -113,66 +164,18 @@ export default function MineMap({
           ))}
           
           {sensors.map((sensor) => {
-            const x = (sensor.position_x / 100) * width;
-            const y = (sensor.position_y / 100) * height;
-            const color = getSensorColor(sensor.type);
+            const x = (sensor.position_x / 100) * MAP_WIDTH;
+            const y = (sensor.position_y / 100) * MAP_HEIGHT;
             
             return (
-              <g
-                key={sensor.id}
-                transform={`translate(${x}, ${y})`}
-                className="cursor-pointer transition-transform hover:scale-110"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onSensorClick?.(sensor);
-                }}
-                onMouseEnter={() => setHoveredSensor(sensor)}
-                onMouseLeave={() => setHoveredSensor(null)}
-              >
-                <circle
-                  r="20"
-                  fill={color}
-                  stroke="white"
-                  strokeWidth="2"
-                  className="drop-shadow-lg"
+              <g key={sensor.id} transform={`translate(${x}, ${y})`}>
+                <SensorMarker
+                  sensor={sensor}
+                  onClick={() => onSensorClick?.(sensor)}
+                  onHover={setHoveredSensor}
                 />
-                <text
-                  textAnchor="middle"
-                  dy="5"
-                  fontSize="14"
-                >
-                  {getSensorIcon(sensor.type)}
-                </text>
-                
                 {hoveredSensor?.id === sensor.id && (
-                  <g>
-                    <rect
-                      x="-60"
-                      y="-50"
-                      width="120"
-                      height="35"
-                      fill="black"
-                      fillOpacity={0.8}
-                      rx="4"
-                    />
-                    <text
-                      textAnchor="middle"
-                      y="-32"
-                      fill="white"
-                      fontSize="11"
-                      fontWeight="bold"
-                    >
-                      {sensor.name}
-                    </text>
-                    <text
-                      textAnchor="middle"
-                      y="-20"
-                      fill="#9CA3AF"
-                      fontSize="10"
-                    >
-                      {sensor.location}
-                    </text>
-                  </g>
+                  <SensorTooltip sensor={sensor} />
                 )}
               </g>
             );
@@ -181,22 +184,26 @@ export default function MineMap({
       </div>
       
       {showLegend && (
-        <div className="mt-4 flex flex-wrap gap-4 text-sm">
-          <div className="flex items-center gap-2">
-            <span className="w-4 h-4 rounded-full bg-green-500"></span>
-            <span>Gas Normal</span>
+        <div className="mt-2 flex flex-wrap gap-3 text-xs">
+          <div className="flex items-center gap-1">
+            <span className="w-2.5 h-2.5 rounded-full bg-green-500"></span>
+            <span>Normal</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="w-4 h-4 rounded-full bg-yellow-500"></span>
-            <span>Warning</span>
+          <div className="flex items-center gap-1">
+            <span className="w-2.5 h-2.5 rounded-full bg-yellow-500"></span>
+            <span>Advertencia</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="w-4 h-4 rounded-full bg-red-500"></span>
+          <div className="flex items-center gap-1">
+            <span className="w-2.5 h-2.5 rounded-full bg-red-500"></span>
             <span>Crítico</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="w-4 h-4 rounded-full bg-blue-500"></span>
-            <span>Temperatura</span>
+          <div className="flex items-center gap-1">
+            <Wind className="w-3 h-3 text-green-500" />
+            <span>Gas</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Thermometer className="w-3 h-3 text-blue-500" />
+            <span>Temp</span>
           </div>
         </div>
       )}

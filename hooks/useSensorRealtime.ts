@@ -1,12 +1,19 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 
-export function useSensorRealtime(sensorId: number | string, initialValue: number = 0) {
+export function useSensorRealtime(sensorId: number | string | undefined, initialValue: number = 0) {
   const [value, setValue] = useState<number>(initialValue);
+  const [isLoading, setIsLoading] = useState(true);
   const supabase = createClient();
 
   useEffect(() => {
+    if (!sensorId || sensorId === undefined) {
+      setIsLoading(false);
+      return;
+    }
+
     const fetchLastValue = async () => {
+      setIsLoading(true);
       try {
         const { data, error } = await supabase
           .from('reading')
@@ -24,6 +31,8 @@ export function useSensorRealtime(sensorId: number | string, initialValue: numbe
         if (data) setValue(data.value);
       } catch (err) {
         console.error("Error inesperado:", err);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -51,5 +60,5 @@ export function useSensorRealtime(sensorId: number | string, initialValue: numbe
     };
   }, [sensorId]);
 
-  return value;
+  return { value, isLoading };
 }

@@ -16,6 +16,7 @@ import {
   ShoppingCart,
   Users,
   Shield,
+  CreditCard,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -36,6 +37,7 @@ export default function Sidebar({ children, userData }: SidebarProps) {
     { href: "/operator", label: "Dashboard", icon: Gauge },
     { href: "/operator/map", label: "Mapa de la Mina", icon: HardHat },
     { href: "/operator/alerts", label: "Alertas", icon: TriangleAlert },
+    { href: "/operator/subscription", label: "Suscripción", icon: CreditCard },
   ];
 
   const adminNavItems = [

@@ -1,20 +1,20 @@
 'use client';
 
 import { Sensor, SensorCreate, SensorUpdate } from '@/types/sensor';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 interface SensorFormProps {
   sensor?: Sensor;
   companyId: number;
+  existingSensors?: Sensor[];
   onSubmit: (data: SensorCreate | SensorUpdate) => Promise<void>;
   onCancel: () => void;
 }
 
-export default function SensorForm({ sensor, companyId, onSubmit, onCancel }: SensorFormProps) {
+export default function SensorForm({ sensor, companyId, existingSensors = [], onSubmit, onCancel }: SensorFormProps) {
   const [formData, setFormData] = useState({
     name: sensor?.name || '',
     type: sensor?.type || 'Gas',
-    location: sensor?.location || '',
     description: sensor?.description || '',
     min_threshold: sensor?.min_threshold ?? 0,
     max_threshold: sensor?.max_threshold ?? 100,
@@ -48,6 +48,8 @@ export default function SensorForm({ sensor, companyId, onSubmit, onCancel }: Se
     }));
   };
 
+  const otherSensors = existingSensors.filter(s => s.id !== sensor?.id);
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
@@ -76,19 +78,6 @@ export default function SensorForm({ sensor, companyId, onSubmit, onCancel }: Se
             <option value="Gas">Gas</option>
             <option value="Temperatura">Temperatura</option>
           </select>
-        </div>
-        
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text">Ubicación</span>
-          </label>
-          <input
-            type="text"
-            className="input input-bordered"
-            value={formData.location}
-            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-            required
-          />
         </div>
         
         <div className="form-control col-span-2">
@@ -133,18 +122,29 @@ export default function SensorForm({ sensor, companyId, onSubmit, onCancel }: Se
             <span className="label-text">Posición en el Mapa</span>
           </label>
           <div
-            className="relative w-full h-32 bg-base-300 rounded-lg cursor-crosshair border-2 border-dashed border-base-content/30"
+            className="relative w-full h-40 bg-base-300 rounded-lg cursor-crosshair border-2 border-dashed border-base-content/30"
             onClick={handlePositionClick}
           >
+            {otherSensors.map((s) => (
+              <div
+                key={s.id}
+                className="absolute w-3 h-3 bg-purple-500 rounded-full transform -translate-x-1/2 -translate-y-1/2 border border-white"
+                style={{
+                  left: `${s.position_x}%`,
+                  top: `${s.position_y}%`,
+                }}
+                title={s.name}
+              />
+            ))}
             <div
-              className="absolute w-4 h-4 bg-primary rounded-full transform -translate-x-1/2 -translate-y-1/2 transition-all"
+              className="absolute w-4 h-4 bg-primary rounded-full transform -translate-x-1/2 -translate-y-1/2 transition-all ring-2 ring-white ring-offset-1 ring-offset-base-300"
               style={{
                 left: `${formData.position_x}%`,
                 top: `${formData.position_y}%`,
               }}
             />
             <p className="absolute bottom-2 left-2 text-xs text-base-content/50">
-              Click en el mapa para posicionar
+              Click para posicionar • Los puntos morados son sensores existentes
             </p>
           </div>
           

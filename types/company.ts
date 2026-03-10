@@ -4,9 +4,12 @@ export interface Company {
   industry: string;
   public_token: string;
   is_public_enabled: boolean;
-  onboarding_completed: boolean;
   created_at: string;
   created_by?: string;
+  service_id?: number;
+  subscription_start?: string;
+  subscription_end?: string;
+  is_subscription_active: boolean;
 }
 
 export interface CompanyCreate {
@@ -18,7 +21,6 @@ export interface CompanyUpdate {
   name?: string;
   industry?: string;
   is_public_enabled?: boolean;
-  onboarding_completed?: boolean;
 }
 
 export interface Zone {

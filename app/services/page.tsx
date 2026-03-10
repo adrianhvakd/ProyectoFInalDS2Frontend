@@ -6,8 +6,9 @@ import PublicNavbar from '@/components/layout/PublicNavbar';
 import PublicFooter from '@/components/layout/PublicFooter';
 import CheckoutModal from '@/components/checkout/CheckoutModal';
 import { Service, parseFeatures } from '@/types/service';
+import { SubscriptionInfo, SubscriptionAction } from '@/types/subscription';
 import { ScrollAnimation } from '@/components/ui/ScrollAnimation';
-import { Shield, Check, ArrowRight, Loader2, Lock, AlertCircle } from 'lucide-react';
+import { Shield, Check, ArrowRight, Loader2, Lock, AlertCircle, CreditCard, Zap, Brain, BarChart3, Bell } from 'lucide-react';
 import Link from 'next/link';
 
 interface UserData {
@@ -16,6 +17,7 @@ interface UserData {
   username: string;
   full_name: string;
   role: string;
+  company_id?: number;
 }
 
 export default function ServicesPage() {
@@ -23,32 +25,28 @@ export default function ServicesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<UserData | null>(null);
+  const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [selectedAction, setSelectedAction] = useState<SubscriptionAction>('contract');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
-    async function loadServices() {
+    async function loadData() {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/services`);
-        if (!response.ok) throw new Error('Error al cargar servicios');
-        const data = await response.json();
-        setServices(data);
-      } catch (err) {
-        setError('Error al cargar los servicios');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
+        setLoading(true);
+        
+        const servicesRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/services`);
+        if (!servicesRes.ok) throw new Error('Error al cargar servicios');
+        const servicesData = await servicesRes.json();
+        setServices(servicesData);
 
-    async function checkUser() {
-      try {
         const { data: { user: supabaseUser } } = await supabase.auth.getUser();
+        
         if (supabaseUser) {
           const { data: profile } = await supabase
             .from('user')
-            .select('id, email, username, full_name, role')
+            .select('id, email, username, full_name, role, company_id')
             .eq('id', supabaseUser.id)
             .single();
           
@@ -57,23 +55,91 @@ export default function ServicesPage() {
               ...profile,
               email: supabaseUser.email || profile.email || '',
             });
+
+            if (profile.company_id) {
+              try {
+                const { data: { session } } = await supabase.auth.getSession();
+                const subRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/subscriptions/me`, {
+                  credentials: 'include',
+                  headers: {
+                    'Authorization': `Bearer ${session?.access_token}`,
+                    'Content-Type': 'application/json',
+                  },
+                });
+                if (subRes.ok) {
+                  const subData = await subRes.json();
+                  setSubscription(subData);
+                }
+              } catch (e) {
+                console.error('Error loading subscription:', e);
+              }
+            }
           }
         }
-      } catch (error) {
-        console.error('Error checking user:', error);
+      } catch (err) {
+        console.error(err);
+        setError('Error al cargar los servicios');
+      } finally {
+        setLoading(false);
       }
     }
 
-    loadServices();
-    checkUser();
+    loadData();
   }, []);
 
-  const handleContract = (service: Service) => {
+  const getButtonConfig = (service: Service): { label: string; action: SubscriptionAction; className: string } => {
+    if (!user?.company_id || !subscription?.company) {
+      return { label: 'Contratar', action: 'contract', className: 'btn-primary' };
+    }
+
+    const currentServiceId = subscription.company.service_id;
+    const isCurrent = service.id == currentServiceId;
+
+    if (isCurrent) {
+      return { 
+        label: 'Pagar Mensualidad', 
+        action: 'renew', 
+        className: 'btn-primary' 
+      };
+    }
+
+    const currentService = services.find(s => s.id === currentServiceId);
+    const currentLevel = currentService?.plan_level || 0;
+    const isUpgrade = service.plan_level > currentLevel;
+
+    if (isUpgrade) {
+      return { 
+        label: 'Mejorar Plan', 
+        action: 'upgrade', 
+        className: 'btn-primary' 
+      };
+    }
+
+    return { 
+      label: 'Cambiar a Plan Inferior', 
+      action: 'downgrade', 
+      className: 'btn-outline' 
+    };
+  };
+
+  const handleServiceClick = (service: Service) => {
     if (!user) {
       setShowAuthModal(true);
       return;
     }
+
+    const config = getButtonConfig(service);
+    setSelectedAction(config.action);
     setSelectedService(service);
+  };
+
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return 'N/A';
+    return new Date(dateStr).toLocaleDateString('es-ES', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
   };
 
   if (loading) {
@@ -97,6 +163,10 @@ export default function ServicesPage() {
     );
   }
 
+  const currentService = subscription?.company?.service_id 
+    ? services.find(s => s.id === subscription?.company?.service_id) 
+    : null;
+
   return (
     <div className="min-h-screen bg-base-100">
       <PublicNavbar user={user} />
@@ -115,6 +185,39 @@ export default function ServicesPage() {
             </div>
           </ScrollAnimation>
 
+          {subscription && subscription.company && (
+            <div className="mb-8 p-4 bg-base-200 rounded-xl border border-base-300">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm text-base-content/60">Tu plan actual</p>
+                  <h3 className="text-xl font-bold text-primary">{currentService?.name || 'Sin plan'}</h3>
+                  <p className="text-sm text-base-content/70">
+                    Vence: {formatDate(subscription.company.subscription_end)} 
+                    ({subscription.company.days_remaining} días restantes)
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Link href="/operator/subscription" className="btn btn-outline btn-sm gap-2">
+                    <CreditCard className="w-4 h-4" />
+                    Gestionar
+                  </Link>
+                  <button 
+                    onClick={() => {
+                      if (currentService) {
+                        setSelectedAction('renew');
+                        setSelectedService(currentService);
+                      }
+                    }}
+                    className="btn btn-primary btn-sm gap-2"
+                  >
+                    <CreditCard className="w-4 h-4" />
+                    Pagar Mensualidad
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {services.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-base-content/60 mb-4">No hay servicios disponibles actualmente.</p>
@@ -126,17 +229,28 @@ export default function ServicesPage() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {services.map((service, index) => {
                 const features = parseFeatures(service.features);
+                const buttonConfig = getButtonConfig(service);
+                const isCurrent = subscription?.company?.service_id === service.id;
+                
                 return (
                   <ScrollAnimation key={service.id} delay={index * 100} animation="zoom-in">
-                    <div className="card bg-base-200/80 backdrop-blur-sm border border-base-300 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 h-full flex flex-col group">
-                      <div className="card-body flex flex-col flex-grow p-6">
+                    <div className={`card bg-base-200/80 backdrop-blur-sm border hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 h-full flex flex-col group ${
+                      isCurrent ? 'border-primary' : 'border-base-300 hover:border-primary/50'
+                    }`}>
+                      <div className="card-body flex flex-col grow p-6">
+                        
                         <div className="flex items-center gap-2 mb-3">
                           <div className="p-2 rounded-lg bg-primary/10 text-primary">
                             <Shield className="w-5 h-5" />
                           </div>
-                          <span className="text-xs font-semibold uppercase tracking-wider text-primary/80">
-                            Plan {service.name.split(' ')[0]}
-                          </span>
+                          <div className="flex justify-between items-center gap-16">
+                            <span className="text-xs font-semibold uppercase tracking-wider text-primary/80">
+                              {service.name.split(' ')[1]}
+                            </span>
+                            {isCurrent && (
+                              <div className="badge badge-primary">Tu Plan Actual</div>  
+                            )}
+                          </div>
                         </div>
                         
                         <h2 className="card-title text-xl md:text-2xl text-base-content mb-2 group-hover:text-primary transition-colors">
@@ -145,7 +259,32 @@ export default function ServicesPage() {
                         <p className="text-base-content/60 text-sm mb-4 flex-grow">
                           {service.description}
                         </p>
-                        
+
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          <div className="flex items-center gap-1 text-xs bg-base-100 px-2 py-1 rounded">
+                            <Zap className="w-3 h-3 text-warning" />
+                            {service.max_operators} operador(es)
+                          </div>
+                          {service.has_ai && (
+                            <div className="flex items-center gap-1 text-xs bg-base-100 px-2 py-1 rounded">
+                              <Brain className="w-3 h-3 text-info" />
+                              IA
+                            </div>
+                          )}
+                          {service.has_advanced_reports && (
+                            <div className="flex items-center gap-1 text-xs bg-base-100 px-2 py-1 rounded">
+                              <BarChart3 className="w-3 h-3 text-success" />
+                              Reportes
+                            </div>
+                          )}
+                          {service.has_priority_notifications && (
+                            <div className="flex items-center gap-1 text-xs bg-base-100 px-2 py-1 rounded">
+                              <Bell className="w-3 h-3 text-error" />
+                              Notif. Prior.
+                            </div>
+                          )}
+                        </div>
+
                         <div className="space-y-2 mb-6">
                           {features.slice(0, 4).map((feature, idx) => (
                             <div 
@@ -177,10 +316,10 @@ export default function ServicesPage() {
                           
                           {user ? (
                             <button 
-                              onClick={() => handleContract(service)}
-                              className="btn btn-primary btn-block gap-2 cursor-pointer hover:scale-[1.02] transition-transform"
+                              onClick={() => handleServiceClick(service)}
+                              className={`btn btn-block gap-2 cursor-pointer hover:scale-[1.02] transition-transform ${buttonConfig.className}`}
                             >
-                              Contratar
+                              {buttonConfig.label}
                               <ArrowRight className="w-4 h-4" />
                             </button>
                           ) : (
@@ -240,6 +379,7 @@ export default function ServicesPage() {
       {selectedService && (
         <CheckoutModal 
           service={selectedService}
+          action={selectedAction}
           isOpen={!!selectedService}
           onClose={() => setSelectedService(null)}
         />

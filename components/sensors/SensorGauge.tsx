@@ -4,9 +4,9 @@ import { useSensorRealtime } from "@/hooks/useSensorRealtime";
 import { SensorGaugeProps } from "@/types/sensor";
 
 export function SensorGauge({ sensorId, name, unit, max, initialValue = 0 }: SensorGaugeProps) {
-  const currentValue = useSensorRealtime(String(sensorId), initialValue);
+  const { value: currentValue } = useSensorRealtime(String(sensorId), initialValue);
   
-  const percentage = Math.min((currentValue / max) * 100, 100);
+  const percentage = max > 0 ? Math.min((currentValue / max) * 100, 100) : 0;
   
   const getColor = () => {
     if (percentage > 80) return "text-error";
@@ -30,7 +30,7 @@ export function SensorGauge({ sensorId, name, unit, max, initialValue = 0 }: Sen
           role="progressbar"
         >
           <div className="flex flex-col items-center text-base-content">
-            <span className="text-4xl font-black">{currentValue.toFixed(1)}</span>
+            <span className="text-4xl font-black">{currentValue !== undefined ? currentValue.toFixed(1) : '--'}</span>
             <span className="text-xs font-medium opacity-60">{unit}</span>
           </div>
         </div>

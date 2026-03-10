@@ -2,7 +2,6 @@ export interface Sensor {
   id: number;
   name: string;
   type: string;
-  location: string;
   description?: string;
   min_threshold: number;
   max_threshold: number;
@@ -11,6 +10,7 @@ export interface Sensor {
   position_x: number;
   position_y: number;
   company_id: number;
+  last_value?: number;
 }
 
 export type SensorCreate = Omit<Sensor, 'id' | 'is_active'>;
