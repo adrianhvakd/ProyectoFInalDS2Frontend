@@ -1,4 +1,4 @@
-import ThemeToggleButton from "@/components/ui/ThemeToggleButton";
+import ThemeSelector from "@/components/ui/ThemeSelector";
 
 export default function AuthLayout({
   children,
@@ -7,7 +7,9 @@ export default function AuthLayout({
 }) {
   return (
     <div className="min-h-screen bg-base-100 relative">
-      <ThemeToggleButton />
+      <div className="absolute top-4 right-4 z-50">
+        <ThemeSelector />
+      </div>
       {children}
     </div>
   );

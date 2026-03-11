@@ -1,14 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClient } from '@/utils/supabase/client';
 import { subscriptionService } from '@/services/subscriptionService';
-import { Service, parseFeatures } from '@/types/service';
+import { Service } from '@/types/service';
 import { SubscriptionInfo, SubscriptionPayment, SubscriptionAction } from '@/types/subscription';
 import CheckoutModal from '@/components/checkout/CheckoutModal';
 import { 
   Calendar, Clock, AlertTriangle,  CreditCard, CheckCircle, 
-  XCircle, Loader2, ArrowRight, FileText, Shield, Zap, 
+  XCircle, FileText, Shield, Zap, 
   Brain, BarChart3, Bell, ChevronRight
 } from 'lucide-react';
 
@@ -21,7 +20,6 @@ export default function SubscriptionPage() {
   const [selectedAction, setSelectedAction] = useState<SubscriptionAction>('renew');
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
-  const supabase = createClient();
 
   useEffect(() => {
     loadData();
@@ -55,9 +53,6 @@ export default function SubscriptionPage() {
     }
   };
 
-  const handleOpenChangePlan = (action: 'upgrade' | 'downgrade') => {
-    setSelectedAction(action);
-  };
 
   const handleSelectService = (service: Service) => {
     const isUpgrade = service.plan_level > (currentService?.plan_level || 0);
@@ -104,14 +99,73 @@ export default function SubscriptionPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-base-100 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="min-h-screen bg-base-100 font-sans text-base-content p-6 lg:p-8">
+        <main className="max-w-6xl mx-auto space-y-8">
+          <header>
+            <div className="skeleton h-8 w-48 mb-2"></div>
+            <div className="skeleton h-4 w-64"></div>
+          </header>
+          
+          <div className="card bg-base-200 border border-base-300">
+            <div className="card-body">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <div className="skeleton h-6 w-32 mb-2"></div>
+                  <div className="skeleton h-4 w-48"></div>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="flex items-center gap-3 p-4 bg-base-100 rounded-lg">
+                    <div className="skeleton w-8 h-8 rounded"></div>
+                    <div>
+                      <div className="skeleton h-3 w-16 mb-1"></div>
+                      <div className="skeleton h-5 w-12"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="card bg-base-200 border border-base-300">
+            <div className="card-body">
+              <div className="skeleton h-6 w-32 mb-4"></div>
+              <div className="grid md:grid-cols-3 gap-4">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="p-4 rounded-lg border border-base-300 bg-base-100">
+                    <div className="skeleton h-5 w-24 mb-2"></div>
+                    <div className="skeleton h-8 w-16 mb-3"></div>
+                    <div className="skeleton h-4 w-full"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
     );
   }
 
   const currentService = getCurrentService();
-  const features = currentService ? parseFeatures(currentService.features) : [];
+  
+  const getServiceFeatures = () => {
+    if (!currentService) return [];
+    const features = [];
+    features.push({ name: "Acceso a la plataforma", icon: Shield })
+    if (currentService.has_ai) {
+      features.push({ name: "IA Predictiva", icon: Brain });
+    }
+    if (currentService.has_advanced_reports) {
+      features.push({ name: "Reportes Avanzados", icon: BarChart3 });
+    }
+    if (currentService.has_priority_notifications) {
+      features.push({ name: "Notificaciones Prioritarias", icon: Bell });
+    }
+    return features;
+  };
+
+  const serviceFeatures = getServiceFeatures();
 
   return (
     <div className="min-h-screen bg-base-100 font-sans text-base-content p-6 lg:p-8">
@@ -128,7 +182,6 @@ export default function SubscriptionPage() {
           </div>
         )}
 
-        {/* Estado de suscripción */}
         <div className="card bg-base-200 border border-base-300">
           <div className="card-body">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -170,25 +223,26 @@ export default function SubscriptionPage() {
               </div>
             )}
 
-            {/* Características del plan */}
-            {currentService && (
+            {currentService && serviceFeatures.length > 0 && (
               <div className="mt-6 p-4 bg-base-100 rounded-lg">
                 <h3 className="font-semibold mb-3">Tu plan incluye:</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {features.slice(0).map((feature, idx) => (
-                    <div key={idx} className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-success" />
-                      <span>{feature.name}</span>
-                    </div>
-                  ))}
+                  {serviceFeatures.map((feature, idx) => {
+                    const Icon = feature.icon;
+                    return (
+                      <div key={idx} className="flex items-center gap-2 text-sm">
+                        <Icon className="w-4 h-4 text-success" />
+                        <span>{feature.name}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
 
-            {/* Botones de acción */}
             <div className="flex flex-wrap gap-3 mt-6">
               <button 
-                onClick={handleOpenPayment}
+                onClick={() => handleOpenPayment()}
                 className="btn btn-primary gap-2"
               >
                 <CreditCard className="w-5 h-5" />
@@ -201,7 +255,7 @@ export default function SubscriptionPage() {
                     Cambiar Plan
                     <ChevronRight className="w-4 h-4" />
                   </button>
-                  <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow-lg bg-base-200 rounded-box w-64 mt-2">
+                  <ul tabIndex={0} className="dropdown-content z-1 menu p-2 shadow-lg bg-base-200 rounded-box w-64 mt-2">
                     {services.filter(s => s.id !== subscription?.company?.service_id).map(service => {
                       const isUpgrade = service.plan_level > (currentService?.plan_level || 0);
                       return (
@@ -223,14 +277,12 @@ export default function SubscriptionPage() {
           </div>
         </div>
 
-        {/* Planes disponibles */}
         <div className="card bg-base-200 border border-base-300">
           <div className="card-body">
             <h3 className="card-title text-lg">Planes Disponibles</h3>
             <div className="grid md:grid-cols-3 gap-4 mt-4">
               {services.map(service => {
                 const isCurrent = service.id === subscription?.company?.service_id;
-                const isUpgrade = service.plan_level > (currentService?.plan_level || 0);
                 
                 return (
                   <div 
@@ -251,8 +303,8 @@ export default function SubscriptionPage() {
                     </p>
                     <ul className="mt-3 space-y-1 text-sm">
                       <li className="flex items-center gap-2">
-                        <Zap className="w-4 h-4 text-warning" />
-                        {service.max_operators} operador(es)
+                        <Zap className="w-4 h-4 text-primary" />
+                        Acceso a la plataforma
                       </li>
                       {service.has_ai && (
                         <li className="flex items-center gap-2">
@@ -327,9 +379,7 @@ export default function SubscriptionPage() {
                             payment.status === 'rejected' ? 'badge-error' :
                             'badge-ghost'
                           }`}>
-                            {payment.status === 'pending_review' ? 'Pendiente' : 
-                             payment.status === 'approved' ? 'Aprobado' :
-                             payment.status === 'rejected' ? 'Rechazado' : payment.status}
+                            {payment.status === 'pending_review' ? 'Pendiente' : payment.status === 'approved' ? 'Aprobado' : payment.status === 'rejected' ? 'Rechazado' : payment.status}
                           </span>
                         </td>
                       </tr>

@@ -29,8 +29,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
-                var theme = localStorage.getItem('theme') || 'dark';
-                var dataTheme = theme === 'dark' ? 'mining-dark' : 'mining-light';
+                var mode = localStorage.getItem('theme-mode') || 'dark';
+                var color = localStorage.getItem('theme-color') || 'morado';
+                var dataTheme = 'mining-' + mode + '-' + color;
                 document.documentElement.setAttribute('data-theme', dataTheme);
               })();
             `,

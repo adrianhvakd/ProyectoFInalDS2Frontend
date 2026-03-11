@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { logout } from "./auth/actions";
 import { UserData } from "./auth/actions";
 import { useNotifications, NotificationBell, NotificationDropdown } from "@/components/ui/useNotifications";
-import ThemeToggle from "@/components/ui/ThemeToggle";
+import ThemeSelector from "@/components/ui/ThemeSelector";
 import {
   Gauge,
   TriangleAlert,
@@ -80,7 +80,7 @@ export default function Sidebar({ children, userData }: SidebarProps) {
 
           <div className="flex-none flex items-center gap-2 sm:gap-4">
 
-            <ThemeToggle />
+            <ThemeSelector />
 
             <div className="relative" ref={dropdownRef}>
               <NotificationBell unreadCount={unreadCount} onClick={openNotifications} />

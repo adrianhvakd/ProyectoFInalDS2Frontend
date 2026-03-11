@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { logout } from "@/components/auth/actions";
 import NavbarNotifications from "@/components/layout/NavbarNotifications";
-import ThemeToggle from "@/components/ui/ThemeToggle";
+import ThemeSelector from "@/components/ui/ThemeSelector";
 import { Shield, LogOut, ChevronRight, Users } from "lucide-react";
 
 interface UserData {
@@ -63,7 +63,7 @@ export default function PublicNavbar({ user }: PublicNavbarProps) {
       </div>
       
       <div className="navbar-end gap-2">
-        <ThemeToggle />
+        <ThemeSelector />
         
         {user ? (
           <>

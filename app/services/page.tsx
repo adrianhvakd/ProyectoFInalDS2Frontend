@@ -262,8 +262,8 @@ export default function ServicesPage() {
 
                         <div className="flex flex-wrap gap-2 mb-4">
                           <div className="flex items-center gap-1 text-xs bg-base-100 px-2 py-1 rounded">
-                            <Zap className="w-3 h-3 text-warning" />
-                            {service.max_operators} operador(es)
+                            <Zap className="w-3 h-3 text-primary" />
+                            Acceso a la plataforma
                           </div>
                           {service.has_ai && (
                             <div className="flex items-center gap-1 text-xs bg-base-100 px-2 py-1 rounded">

@@ -174,8 +174,7 @@ export default function LandingPage() {
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t from-base-100 to-transparent" />
       </section>
 
-      <ScrollAnimation>
-        <section className="py-24 px-4 bg-base-200/50 relative overflow-hidden">
+      <section className="py-24 px-4 bg-base-200/50 relative overflow-hidden">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
           <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-info/5 rounded-full blur-3xl" />
           
@@ -193,30 +192,33 @@ export default function LandingPage() {
               {features.map((feature, index) => {
                 const Icon = feature.icon;
                 return (
-                  <div 
+                  <ScrollAnimation 
                     key={index}
-                    className="group p-6 rounded-2xl bg-base-200/70 border border-base-300/50 hover:border-primary/30 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-2 cursor-pointer backdrop-blur-sm"
-                    style={{ animationDelay: `${index * 100}ms` }}
+                    animation="fade-up"
+                    delay={index * 100}
                   >
-                    <div className={`w-14 h-14 rounded-xl ${feature.bg} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 shadow-inner`}>
-                      <Icon className={`w-7 h-7 ${feature.color}`} />
+                    <div 
+                      className="group p-6 rounded-2xl bg-base-200/70 border border-base-300/50 hover:border-primary/30 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-2 cursor-pointer backdrop-blur-sm h-full"
+                    >
+                      <div className={`w-14 h-14 rounded-xl ${feature.bg} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 shadow-inner`}>
+                        <Icon className={`w-7 h-7 ${feature.color}`} />
+                      </div>
+                      <h3 className="text-xl font-semibold text-base-content mb-3 group-hover:text-primary transition-colors">
+                        {feature.title}
+                      </h3>
+                      <p className="text-base-content/60 leading-relaxed">
+                        {feature.description}
+                      </p>
                     </div>
-                    <h3 className="text-xl font-semibold text-base-content mb-3 group-hover:text-primary transition-colors">
-                      {feature.title}
-                    </h3>
-                    <p className="text-base-content/60 leading-relaxed">
-                      {feature.description}
-                    </p>
-                  </div>
+                  </ScrollAnimation>
                 );
               })}
             </div>
           </div>
         </section>
-      </ScrollAnimation>
 
-      <ScrollAnimation>
-        <section className="py-24 px-4 relative overflow-hidden">
+        <ScrollAnimation>
+          <section className="py-24 px-4 relative overflow-hidden">
           <div className="absolute inset-0 bg-linear-to-r from-primary/5 via-base-100 to-transparent" />
           <div className="absolute top-0 right-0 w-125 h-125 bg-primary/10 rounded-full blur-[120px]" />
           <div className="absolute bottom-0 left-0 w-100 h-100 bg-primary/5 rounded-full blur-[100px]" />

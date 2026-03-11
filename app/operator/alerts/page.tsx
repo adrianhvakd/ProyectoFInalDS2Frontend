@@ -7,7 +7,7 @@ import ModalAlertsHistory from "@/components/alerts/ModalAlertsHistory";
 import { createClient } from "@/utils/supabase/client";
 import { getUserData } from "@/components/auth/actions";
 import { Alert } from "@/types/alert";
-import { TriangleAlert, AlertTriangle, ShieldCheck, History, Trash2, Download, TrendingUp  } from "lucide-react";
+import { TriangleAlert, AlertTriangle, ShieldCheck, History, Trash2, Download, TrendingUp, CheckCircle, XCircle, Clock } from "lucide-react";
 
 type FilterType = "all" | "active" | "resolved";
 
@@ -21,6 +21,8 @@ export default function OperatorAlertsPage() {
   const [showHistory, setShowHistory] = useState(false);
   const [filter, setFilter] = useState<FilterType>("all");
   const [resolvedAlerts, setResolvedAlerts] = useState<Alert[]>([]);
+  const [resolvedTotalCount, setResolvedTotalCount] = useState(0);
+  const [resolvedLoading, setResolvedLoading] = useState(true);
   const supabase = createClient();
 
   useEffect(() => {
@@ -36,6 +38,14 @@ export default function OperatorAlertsPage() {
   useEffect(() => {
     async function fetchResolved() {
       if (!companyId) return;
+      setResolvedLoading(true);
+      const { count } = await supabase
+        .from("alert")
+        .select("*", { count: "exact", head: true })
+        .eq("is_resolved", true)
+        .eq("company_id", companyId);
+      setResolvedTotalCount(count || 0);
+
       const { data } = await supabase
         .from("alert")
         .select("*")
@@ -44,6 +54,7 @@ export default function OperatorAlertsPage() {
         .order("timestamp", { ascending: false })
         .limit(10);
       if (data) setResolvedAlerts(data);
+      setResolvedLoading(false);
     }
     fetchResolved();
   }, [companyId]);
@@ -66,10 +77,45 @@ export default function OperatorAlertsPage() {
     }
   };
 
-  if (loading || sensorsLoading) {
+  const isLoading = loading || sensorsLoading || resolvedLoading;
+
+  if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-full">
-        <span className="loading loading-spinner loading-lg text-primary"></span>
+      <div className="p-6 lg:p-8 max-w-5xl mx-auto">
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <div className="skeleton h-8 w-64 mb-2"></div>
+              <div className="skeleton h-4 w-48"></div>
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-base-200 rounded-xl p-4 border border-neutral-content/10">
+              <div className="flex items-center gap-3">
+                <div className="skeleton w-10 h-10 rounded-full"></div>
+                <div>
+                  <div className="skeleton h-3 w-20 mb-1"></div>
+                  <div className="skeleton h-6 w-12"></div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="space-y-4">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+            <div key={i} className="bg-base-200 rounded-xl p-5 border-l-4 skeleton border-l-base-300">
+              <div className="flex items-start gap-4">
+                <div className="skeleton w-10 h-10 rounded-full"></div>
+                <div className="flex-1">
+                  <div className="skeleton h-4 w-3/4 mb-2"></div>
+                  <div className="skeleton h-3 w-1/2"></div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -77,7 +123,8 @@ export default function OperatorAlertsPage() {
   const activeAlerts = [...criticals, ...warnings];
   const highCount = criticals.length;
   const mediumCount = warnings.length;
-  const resolvedToday = resolvedAlerts.length;
+
+  const formatCount = (count: number) => count > 999 ? "999+" : count;
 
   const getFilteredAlerts = () => {
     if (filter === "active") return activeAlerts;
@@ -121,7 +168,7 @@ export default function OperatorAlertsPage() {
             </div>
             <div>
               <p className="text-xs text-base-content/60">Resueltas</p>
-              <p className="text-2xl font-bold text-base-content">{resolvedToday}</p>
+              <p className="text-2xl font-bold text-base-content">{formatCount(resolvedTotalCount)}</p>
             </div>
           </div>
         </div>
@@ -224,14 +271,20 @@ export default function OperatorAlertsPage() {
               }`}
             >
               <div className="flex items-start gap-4">
-                <div className={`text-2xl ${
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
                   alert.is_resolved 
-                    ? "text-success" 
+                    ? "bg-success/20" 
                     : alert.severity === "high" 
-                      ? "text-error" 
-                      : "text-warning"
+                      ? "bg-error/20" 
+                      : "bg-warning/20"
                 }`}>
-                  {alert.is_resolved ? "✓" : alert.severity === "high" ? "⊗" : "⚠"}
+                  {alert.is_resolved ? (
+                    <CheckCircle className="w-5 h-5 text-success" />
+                  ) : alert.severity === "high" ? (
+                    <XCircle className="w-5 h-5 text-error" />
+                  ) : (
+                    <AlertTriangle className="w-5 h-5 text-warning" />
+                  )}
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
@@ -247,16 +300,12 @@ export default function OperatorAlertsPage() {
                     </span>
                   </div>
                   <p className="text-xs text-base-content/50 flex items-center gap-1 mb-1">
-                    ⏱ {new Date(alert.timestamp).toLocaleString("es-ES")}
+                    <Clock className="w-3 h-3" /> {new Date(alert.timestamp).toLocaleString("es-ES")}
                   </p>
                   <p className="text-xs text-base-content/50">Reading ID: {alert.reading_id}</p>
                 </div>
                 <div className="flex gap-2">
-                  {alert.is_resolved ? (
-                    <span className="btn btn-success btn-sm btn-disabled bg-success/20 border-success/30 text-success">
-                      Resuelta
-                    </span>
-                  ) : (
+                  {!alert.is_resolved && (
                     <>
                       <button className="btn btn-sm btn-outline border-base-300">
                         Ver Detalles
