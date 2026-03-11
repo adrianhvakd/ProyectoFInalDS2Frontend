@@ -27,7 +27,7 @@ export default function ClientLayout({ children, userData }: ClientLayoutProps) 
   const supabase = createClient();
   
   const isAuthPage = pathname?.startsWith('/auth/login') || pathname?.startsWith('/auth/register') || pathname?.startsWith('/auth/callback');
-  const isPublicPage = pathname === '/' || pathname?.startsWith('/services');
+  const isPublicPage = pathname === '/' || pathname?.startsWith('/services') || pathname?.startsWith('/docs');
   const isOperatorPage = pathname?.startsWith('/operator');
   const isAdminPage = pathname?.startsWith('/admin');
   const isSubscriptionPage = pathname === '/operator/subscription';

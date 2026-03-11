@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import PublicNavbar from '@/components/layout/PublicNavbar';
 import PublicFooter from '@/components/layout/PublicFooter';
 import { ScrollAnimation } from '@/components/ui/ScrollAnimation';
-import { Activity, AlertTriangle, Map, Users, ArrowRight, Bell, FileText } from 'lucide-react';
+import { Activity, AlertTriangle, Map, Users, ArrowRight, Bell, FileText, BookOpen } from 'lucide-react';
 
 const features = [
   {
@@ -60,10 +60,30 @@ interface UserData {
   role: string;
 }
 
+const FULL_TEXT = 'inteligencia artificial';
+
 export default function LandingPage() {
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [typedText, setTypedText] = useState('');
+  const hasStartedRef = useRef(false);
   const supabase = createClient();
+
+  useEffect(() => {
+    if (hasStartedRef.current) return;
+    hasStartedRef.current = true;
+    
+    let currentIndex = 0;
+    const typeNextChar = () => {
+      if (currentIndex <= FULL_TEXT.length) {
+        setTypedText(FULL_TEXT.slice(0, currentIndex));
+        currentIndex++;
+        setTimeout(typeNextChar, 100);
+      }
+    };
+    
+    setTimeout(typeNextChar, 500);
+  }, []);
 
   useEffect(() => {
     async function checkUser() {
@@ -120,7 +140,7 @@ export default function LandingPage() {
                 Protege tu mina con
               </span>
               <span className="block text-primary">
-                inteligencia artificial
+                {typedText}<span className="animate-pulse">|</span>
               </span>
             </h1>
             
@@ -137,21 +157,13 @@ export default function LandingPage() {
                 Ver Servicios
                 <ArrowRight className="w-5 h-5" />
               </a>
-              {user ? (
-                <a 
-                  href={`/${user.role}`} 
-                  className="btn btn-outline btn-lg gap-2 cursor-pointer"
-                >
-                  Ir al Panel
-                </a>
-              ) : (
-                <a 
-                  href="/auth/login" 
-                  className="btn btn-outline btn-lg gap-2 cursor-pointer"
-                >
-                  Iniciar Sesión
-                </a>
-              )}
+              <a 
+                href="/docs" 
+                className="btn btn-outline btn-lg gap-2 cursor-pointer"
+              >
+                Documentacion
+                <BookOpen className="w-5 h-5" />
+              </a>
             </div>
           </div>
 

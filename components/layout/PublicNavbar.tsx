@@ -4,7 +4,7 @@ import Link from "next/link";
 import { logout } from "@/components/auth/actions";
 import NavbarNotifications from "@/components/layout/NavbarNotifications";
 import ThemeSelector from "@/components/ui/ThemeSelector";
-import { Shield, LogOut, ChevronRight, Users } from "lucide-react";
+import { Shield, LogOut, ChevronRight, Users, BookOpen } from "lucide-react";
 
 interface UserData {
   id: string;
@@ -30,6 +30,7 @@ export default function PublicNavbar({ user }: PublicNavbarProps) {
           </div>
           <ul tabIndex={0} className="menu menu-sm dropdown-content bg-base-200 rounded-box z-[1] mt-3 w-52 p-2 shadow-lg">
             <li><Link href="/services" className="cursor-pointer">Servicios</Link></li>
+            <li><Link href="/docs" className="cursor-pointer">Documentacion</Link></li>
             <li><a className="cursor-pointer">Acerca de</a></li>
             <li><a className="cursor-pointer">Contacto</a></li>
           </ul>
@@ -47,6 +48,11 @@ export default function PublicNavbar({ user }: PublicNavbarProps) {
           <li>
             <Link href="/services" className="text-base-content/70 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer">
               Servicios
+            </Link>
+          </li>
+          <li>
+            <Link href="/docs" className="text-base-content/70 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer">
+              Documentacion
             </Link>
           </li>
           <li>
